@@ -1,0 +1,309 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black">
+<meta name="apple-mobile-web-app-title" content="DronePoint">
+<meta name="theme-color" content="#000000">
+<link rel="apple-touch-icon" href="icons/icon-180.png">
+<link rel="icon" type="image/png" sizes="512x512" href="icons/icon-512.png">
+<link rel="icon" type="image/png" sizes="192x192" href="icons/icon-192.png">
+<title>Hub — DronePoint</title>
+<style>
+:root{--bg:#f5f5f3;--bg2:#ffffff;--bg3:#efefec;--text:#1a1a1a;--text2:#666;--border:rgba(0,0,0,0.1);--radius:14px;--radius-sm:10px;--green:#1D9E75;--blue:#378ADD;--amber:#EF9F27;--coral:#D85A30;--purple:#7F77DD;--red:#C0392B;}
+@media(prefers-color-scheme:dark){:root{--bg:#141414;--bg2:#1e1e1e;--bg3:#2a2a2a;--text:#f0f0f0;--text2:#888;--border:rgba(255,255,255,0.08);}}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;padding:0 0 60px;}
+.header{padding:48px 24px 8px;}
+.header-title{font-size:28px;font-weight:700;color:var(--text);letter-spacing:-0.5px;}
+.header-sub{font-size:14px;color:var(--text2);margin-top:4px;}
+.section-label{font-size:11px;font-weight:600;color:var(--text2);text-transform:uppercase;letter-spacing:0.08em;padding:24px 24px 10px;}
+.app-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;padding:0 16px;}
+.app-card{background:var(--bg2);border:0.5px solid var(--border);border-radius:var(--radius);padding:18px 16px;text-decoration:none;display:block;transition:transform 0.12s,background 0.12s;}
+.app-card:active{transform:scale(0.97);background:var(--bg3);}
+.app-icon{font-size:28px;margin-bottom:10px;display:block;}
+.app-name{font-size:15px;font-weight:600;color:var(--text);}
+.app-desc{font-size:12px;color:var(--text2);margin-top:3px;line-height:1.4;}
+.app-card.accent-green{border-left:3px solid var(--green);}
+.app-card.accent-blue{border-left:3px solid var(--blue);}
+.app-card.accent-amber{border-left:3px solid var(--amber);}
+.app-card.accent-coral{border-left:3px solid var(--coral);}
+.app-card.accent-purple{border-left:3px solid var(--purple);}
+.coming-soon{opacity:0.45;cursor:default;}
+.coming-tag{display:inline-block;font-size:10px;font-weight:600;background:var(--bg3);color:var(--text2);border-radius:6px;padding:1px 6px;margin-top:6px;}
+
+/* References panel */
+.ref-panel{margin:0 16px;background:var(--bg2);border:0.5px solid var(--border);border-radius:var(--radius);overflow:hidden;}
+.ref-section{padding:16px;}
+.ref-section + .ref-section{border-top:0.5px solid var(--border);}
+.ref-section-title{font-size:11px;font-weight:600;color:var(--text2);text-transform:uppercase;letter-spacing:0.08em;margin-bottom:10px;}
+.ref-list{display:flex;flex-direction:column;gap:6px;margin-bottom:8px;}
+.ref-item{display:flex;align-items:center;gap:10px;padding:8px 10px;background:var(--bg3);border-radius:var(--radius-sm);}
+.ref-item-info{flex:1;min-width:0;}
+.ref-item-name{font-size:13px;font-weight:600;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.ref-item-sub{font-size:11px;color:var(--text2);margin-top:1px;}
+.ref-item-del{font-size:16px;color:var(--text2);cursor:pointer;padding:0 4px;background:none;border:none;flex-shrink:0;}
+.ref-item-del:active{color:var(--red);}
+.ref-add-row{display:flex;gap:6px;}
+.ref-input{flex:1;font-size:13px;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;color:var(--text);background:var(--bg3);border:0.5px solid var(--border);border-radius:var(--radius-sm);padding:7px 10px;outline:none;min-width:0;}
+.ref-input:focus{border-color:var(--blue);}
+.ref-btn{padding:7px 12px;font-size:12px;font-weight:600;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:var(--bg3);border:0.5px solid var(--border);border-radius:var(--radius-sm);color:var(--text2);cursor:pointer;white-space:nowrap;flex-shrink:0;}
+.ref-btn:active{background:var(--bg);}
+.ref-pilot-grid{display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-bottom:6px;}
+.ref-pilot-grid.single{grid-template-columns:1fr;}
+.ref-field{display:flex;flex-direction:column;gap:3px;}
+.ref-label{font-size:10px;color:var(--text2);letter-spacing:0.04em;}
+
+.footer{text-align:center;font-size:11px;color:var(--text2);padding:32px 24px 0;}
+.toast{position:fixed;bottom:20px;left:50%;transform:translateX(-50%);background:var(--text);color:var(--bg);padding:8px 16px;border-radius:20px;font-size:12px;font-weight:600;opacity:0;transition:opacity 0.2s;pointer-events:none;white-space:nowrap;z-index:99;}
+.toast.show{opacity:1;}
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div class="header-title">Hub</div>
+  <div class="header-sub">DronePoint, LLC</div>
+</div>
+
+<div class="section-label">UAS Operations</div>
+<div class="app-grid">
+  <a class="app-card accent-blue" href="https://dronepoint9.github.io/flight-log">
+    <span class="app-icon">✈</span>
+    <div class="app-name">Field Log</div>
+    <div class="app-desc">Field data capture &amp; JSON export</div>
+  </a>
+  <a class="app-card accent-blue" href="https://dronepoint9.github.io/plans">
+    <span class="app-icon">🗺</span>
+    <div class="app-name">Flight Planner</div>
+    <div class="app-desc">Shot plans &amp; field maps</div>
+  </a>
+</div>
+
+<div class="section-label">Field</div>
+<div class="app-grid">
+  <a class="app-card accent-amber" href="https://dronepoint9.github.io/field-tracker">
+    <span class="app-icon">⏱</span>
+    <div class="app-name">Cider Array Site Tracker</div>
+    <div class="app-desc">Drive time &amp; on-site logger</div>
+  </a>
+  <div class="app-card accent-coral coming-soon">
+    <span class="app-icon">📦</span>
+    <div class="app-name">Equipment</div>
+    <div class="app-desc">Gear inventory &amp; maintenance</div>
+    <div class="coming-tag">Coming soon</div>
+  </div>
+</div>
+
+<div class="section-label">Reference</div>
+<div class="app-grid">
+  <a class="app-card accent-purple" href="https://dronepoint9.github.io/docs">
+    <span class="app-icon">📚</span>
+    <div class="app-name">Reference Library</div>
+    <div class="app-desc">Docs, manuals &amp; certificates</div>
+  </a>
+  <div class="app-card accent-green coming-soon">
+    <span class="app-icon">📄</span>
+    <div class="app-name">Proposals</div>
+    <div class="app-desc">Project quotes &amp; proposals</div>
+    <div class="coming-tag">Coming soon</div>
+  </div>
+</div>
+
+<div class="section-label">Business</div>
+<div class="app-grid">
+  <div class="app-card accent-coral coming-soon">
+    <span class="app-icon">📊</span>
+    <div class="app-name">Reports</div>
+    <div class="app-desc">Mission summaries &amp; billing</div>
+    <div class="coming-tag">Coming soon</div>
+  </div>
+  <div class="app-card accent-blue coming-soon">
+    <span class="app-icon">🧾</span>
+    <div class="app-name">Invoicing</div>
+    <div class="app-desc">Time &amp; project invoices</div>
+    <div class="coming-tag">Coming soon</div>
+  </div>
+</div>
+
+<!-- REFERENCES -->
+<div class="section-label">References</div>
+<div class="ref-panel">
+
+  <!-- Pilot -->
+  <div class="ref-section">
+    <div class="ref-section-title">Pilot Info</div>
+    <div class="ref-pilot-grid">
+      <div class="ref-field">
+        <div class="ref-label">Name</div>
+        <input class="ref-input" id="pilotName" placeholder="Nicholas Seres" oninput="savePilot()">
+      </div>
+      <div class="ref-field">
+        <div class="ref-label">Certificate #</div>
+        <input class="ref-input" id="pilotCert" placeholder="5104759" oninput="savePilot()">
+      </div>
+    </div>
+    <div class="ref-pilot-grid single">
+      <div class="ref-field">
+        <div class="ref-label">Phone</div>
+        <input class="ref-input" id="pilotPhone" placeholder="716-491-4033" oninput="savePilot()">
+      </div>
+    </div>
+  </div>
+
+  <!-- Aircraft -->
+  <div class="ref-section">
+    <div class="ref-section-title">Aircraft</div>
+    <div class="ref-list" id="aircraftList"></div>
+    <div class="ref-add-row">
+      <input class="ref-input" id="acName" placeholder="Aircraft name (e.g. DJI M4E)">
+      <input class="ref-input" id="acReg" placeholder="Reg # (e.g. FA3NHH4RXK)">
+      <button class="ref-btn" onclick="addAircraft()">Add</button>
+    </div>
+  </div>
+
+  <!-- Mission Types -->
+  <div class="ref-section">
+    <div class="ref-section-title">Mission Types</div>
+    <div class="ref-list" id="missionTypeList"></div>
+    <div class="ref-add-row">
+      <input class="ref-input" id="mtInput" placeholder="e.g. LiDAR / Photogrammetry">
+      <button class="ref-btn" onclick="addMissionType()">Add</button>
+    </div>
+  </div>
+
+</div>
+
+<div class="footer">dronepoint9.github.io</div>
+<div class="toast" id="toast"></div>
+
+<script>
+const DEFAULTS = {
+  pilot: {name:'Nicholas Seres', cert:'5104759', phone:'716-491-4033'},
+  aircraft: [
+    {name:'DJI M4E', reg:'FA3NHH4RXK'},
+    {name:'DJI Matrice 350 RTK', reg:'FA3ATX99TA'},
+    {name:'DJI Mini 4 Pro', reg:'FA3TX3YPCC'},
+  ],
+  missionTypes: [
+    'Photogrammetry / Construction Progress Monitoring',
+    'LiDAR / Photogrammetry',
+    'Thermal / RGB Inspection',
+    'Facade Inspection',
+    'Photogrammetry',
+    'Thermal Imaging / Solar Array Inspection',
+    'Photo / Video for Marketing',
+  ]
+};
+
+function load(key, def) {
+  try { return JSON.parse(localStorage.getItem(key)) || def; } catch(e) { return def; }
+}
+function save(key, val) { localStorage.setItem(key, JSON.stringify(val)); }
+
+function initRefs() {
+  // Seed defaults on first load
+  if (!localStorage.getItem('dp_aircraft')) save('dp_aircraft', DEFAULTS.aircraft);
+  if (!localStorage.getItem('dp_mission_types')) save('dp_mission_types', DEFAULTS.missionTypes);
+  if (!localStorage.getItem('dp_pilot')) save('dp_pilot', DEFAULTS.pilot);
+
+  const pilot = load('dp_pilot', DEFAULTS.pilot);
+  document.getElementById('pilotName').value  = pilot.name  || '';
+  document.getElementById('pilotCert').value  = pilot.cert  || '';
+  document.getElementById('pilotPhone').value = pilot.phone || '';
+
+  renderAircraft();
+  renderMissionTypes();
+}
+
+function savePilot() {
+  save('dp_pilot', {
+    name:  document.getElementById('pilotName').value,
+    cert:  document.getElementById('pilotCert').value,
+    phone: document.getElementById('pilotPhone').value,
+  });
+}
+
+// ── Aircraft ─────────────────────────────────────────────
+function renderAircraft() {
+  const list = load('dp_aircraft', []);
+  const el = document.getElementById('aircraftList');
+  el.innerHTML = list.map((a,i) => `
+    <div class="ref-item">
+      <div class="ref-item-info">
+        <div class="ref-item-name">${esc(a.name)}</div>
+        <div class="ref-item-sub">${esc(a.reg)}</div>
+      </div>
+      <button class="ref-item-del" onclick="delAircraft(${i})">×</button>
+    </div>
+  `).join('') || '<div style="font-size:12px;color:var(--text2);padding:4px 0;">No aircraft added yet.</div>';
+}
+
+function addAircraft() {
+  const name = document.getElementById('acName').value.trim();
+  const reg  = document.getElementById('acReg').value.trim();
+  if (!name) { toast('Enter aircraft name'); return; }
+  const list = load('dp_aircraft', []);
+  list.push({name, reg});
+  save('dp_aircraft', list);
+  document.getElementById('acName').value = '';
+  document.getElementById('acReg').value  = '';
+  renderAircraft();
+  toast('Aircraft saved');
+}
+
+function delAircraft(i) {
+  if (!confirm('Remove this aircraft?')) return;
+  const list = load('dp_aircraft', []);
+  list.splice(i, 1);
+  save('dp_aircraft', list);
+  renderAircraft();
+}
+
+// ── Mission Types ─────────────────────────────────────────
+function renderMissionTypes() {
+  const list = load('dp_mission_types', []);
+  const el = document.getElementById('missionTypeList');
+  el.innerHTML = list.map((t,i) => `
+    <div class="ref-item">
+      <div class="ref-item-info">
+        <div class="ref-item-name">${esc(t)}</div>
+      </div>
+      <button class="ref-item-del" onclick="delMissionType(${i})">×</button>
+    </div>
+  `).join('') || '<div style="font-size:12px;color:var(--text2);padding:4px 0;">No types added yet.</div>';
+}
+
+function addMissionType() {
+  const val = document.getElementById('mtInput').value.trim();
+  if (!val) { toast('Enter a mission type'); return; }
+  const list = load('dp_mission_types', []);
+  list.push(val);
+  save('dp_mission_types', list);
+  document.getElementById('mtInput').value = '';
+  renderMissionTypes();
+  toast('Mission type saved');
+}
+
+function delMissionType(i) {
+  if (!confirm('Remove this mission type?')) return;
+  const list = load('dp_mission_types', []);
+  list.splice(i, 1);
+  save('dp_mission_types', list);
+  renderMissionTypes();
+}
+
+function toast(msg) {
+  const el = document.getElementById('toast');
+  el.textContent = msg; el.classList.add('show');
+  setTimeout(() => el.classList.remove('show'), 2000);
+}
+
+function esc(s) { return (s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+
+initRefs();
+</script>
+</body>
+</html>
