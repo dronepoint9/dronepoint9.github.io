@@ -13,7 +13,7 @@ Owner: Nick Seres, DronePoint LLC (Buffalo, NY). These are mobile-first apps use
 - Each app is a single `index.html` (HTML, CSS and JS in one file) plus `sw.js` and icons. No build step, no frameworks.
 - Mobile first. Test every change at 390px wide before pushing.
 - Deliver complete updated files, not partial patches.
-- No em dashes in any text, code comments or UI copy.
+- No em dashes in written documents and prose (emails, notes, reports, summaries). Dashes are fine as layout glyphs, for example the PDF builder's section title and empty weather boxes.
 - Do not add dependencies unless asked.
 
 ## Storage (shared)
