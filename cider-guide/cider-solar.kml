@@ -225,7 +225,7 @@
 			<Placemark>
 			<name>CiderArray01</name>
 			<snippet></snippet>
-				<description>137.6 ac. Launch from Array 01 TOL. Flight 1, #13 in capture order.</description>
+				<description>137.6 ac. Launch from Array 01 TOL. Flight 1, #12 in capture order.</description>
 			<styleUrl>#inline98</styleUrl>
 			<Polygon>
 				<tessellate>1</tessellate>
@@ -441,7 +441,7 @@
 			<Placemark>
 			<name>CiderArray12</name>
 			<snippet></snippet>
-				<description>79.6 ac. Launch from Array 12 TOL. Flight 12, #12 in capture order.</description>
+				<description>79.6 ac. Launch from Array 12 TOL. Flight 12, #13 in capture order.</description>
 			<styleUrl>#inline98</styleUrl>
 			<Polygon>
 				<tessellate>1</tessellate>
