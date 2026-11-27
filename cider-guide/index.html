@@ -202,7 +202,7 @@ const shapes=D.areas.map((a,i)=>{
   const cls=a.kind==='support'?'support':a.status;
   const pe=el('polygon',{points:pts.map(p=>p.join(',')).join(' '),class:'poly '+cls,'data-i':i});
   gP.appendChild(pe);
-  const lab=a.kind==='array'?a.name.replace('Array ',''):({Offices:'OFF',Substation:'SUB','West Laydown':'YARD'}[a.name]||a.name);
+  const lab=a.kind==='array'?a.name.replace('Array ',''):({Offices:'ELDY',Substation:'SUB','West Laydown':'WLDY'}[a.name]||a.name);
   const te=el('text',{x:cx,y:cy,class:'lbl'});te.textContent=lab;gL.appendChild(te);
   return {pe,te,cx,cy,bb:pts};
 });
@@ -263,7 +263,7 @@ function noteFor(a){
   return `<div class="note ok">TOL sits inside this area.</div>`}
 function selArea(i,zoom){clearSel();const a=D.areas[i],t=tolById[a.tol];shapes[i].pe.classList.add('sel');tolEls[a.tol-1].c.classList.add('sel');linkLine(a,t);
   card.style.display='block';
-  card.innerHTML=`<h2>${a.name}</h2>${noteFor(a)}
+  card.innerHTML=`<h2>${a.name==='Offices'?'Offices (ELDY)':a.name==='West Laydown'?'West Laydown (WLDY)':a.name}</h2>${noteFor(a)}
    <div class="row"><span>Acres</span><b>${a.acres}</b></div>${a.chain?`<div class="row"><span>Flight</span><b>${a.chain}</b></div>`:''}
    <div class="row"><span>Launch from</span><b>${TN(a.tol)}</b></div>
    <div class="row"><span>Farthest corner from TOL</span><b>${fmt(a.farft)} ft</b></div>
@@ -356,7 +356,7 @@ const numKey=n=>n.startsWith('Array ')?parseFloat(n.slice(6))+(n.endsWith('E')?.
 const flightsOf=name=>D.order.map((o,k)=>[o,k]).filter(([o])=>o.members.includes(name)).map(([,k])=>k);
 function renderNum(){const L=D.areas.map(a=>a.name).sort((a,b)=>numKey(a)-numKey(b));
   items.innerHTML=L.map(n=>{const a=D.areas[idx[n]],t=tolById[a.tol],ks=flightsOf(n),o=D.order[ks[0]];
-   return `<div class="item" data-n="${n}"><input type="checkbox" aria-label="Done"><div class="num">${o?ks[0]+1:''}</div><div class="body"><div class="fl">${n.replace('Array ','')}${n.startsWith('Array')?'':''}</div><div class="meta">${a.acres} ac · ${TN(t.id)}${o&&o.members.length>1?' · in '+o.flight:''}</div></div>${o?`<span class="acts">${t.near===n&&!t.base?`<button class="sk" data-sk="${ks[0]}">Skip</button>`:`<span class="via">Flown from ${t.base?'Base':t.near.replace('Array ','')}</span>`}<button class="mk" data-mk="${ks[0]}">Next</button></span>`:''}<a href="${dir(t.lat,t.lon)}" target="_blank" rel="noopener">Go</a></div>`}).join('');refresh()}
+   return `<div class="item" data-n="${n}"><input type="checkbox" aria-label="Done"><div class="num">${o?ks[0]+1:''}</div><div class="body"><div class="fl">${n==='Offices'?'Offices (ELDY)':n==='West Laydown'?'West Laydown (WLDY)':n.replace('Array ','')}</div><div class="meta">${a.acres} ac · ${TN(t.id)}${o&&o.members.length>1?' · in '+o.flight:''}</div></div>${o?`<span class="acts">${t.near===n&&!t.base?`<button class="sk" data-sk="${ks[0]}">Skip</button>`:`<span class="via">Flown from ${t.base?'Base':t.near.replace('Array ','')}</span>`}<button class="mk" data-mk="${ks[0]}">Next</button></span>`:''}<a href="${dir(t.lat,t.lon)}" target="_blank" rel="noopener">Go</a></div>`}).join('');refresh()}
 function renderList(){document.querySelectorAll('#sortbar button').forEach(b=>b.classList.toggle('on',b.dataset.s===sortMode));if(sortMode==='num')return renderNum();items.innerHTML=plan.map(k=>{const o=D.order[k];const t=tolById[D.areas[idx[o.members[0]]].tol];
   return `<div class="item" data-k="${k}"><input type="checkbox" aria-label="Done"><div class="num">${k+1}</div><div class="body"><div class="fl">${o.flight}</div><div class="meta">${TN(t.id)} · ${acr(o).toFixed(0)} ac · ~${o.min} min${o.note?' · '+o.note:''}</div></div><span class="acts"><button class="sk" data-sk="${k}">Skip</button><button class="mk" data-mk="${k}">Next</button></span><a href="${dir(t.lat,t.lon)}" target="_blank" rel="noopener">Go</a></div>`}).join('');refresh()}
 items.addEventListener('click',e=>{const it=e.target.closest('.item');if(!it||e.target.closest('a'))return;const n=it.dataset.n,k=+it.dataset.k;
