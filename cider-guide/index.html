@@ -143,7 +143,7 @@ footer{padding:6px 16px 28px;font-size:12px;color:var(--muted)}
   <div id="next"></div>
   <div id="edit">
     <div class="lab">Edit routes and entrances</div>
-    <div class="seg" id="emode"><button data-m="route" class="on">Trace route</button><button data-m="ent">Entrance</button></div>
+    <div class="seg" id="emode"><button data-m="route" class="on">Trace route</button><button data-m="ent">Entrance</button><button data-m="alt">Alt access</button></div>
     <select id="esel"></select>
     <div class="meta" id="ehint"></div>
     <div class="btns"><button id="eundo">Undo</button><button id="eclear">Clear</button><button id="ecopy" class="pri">Copy</button><button id="eexit">Done</button></div>
@@ -299,6 +299,10 @@ const open_=j=>!done.has(j)&&!notflown.has(j);
 // access dependencies: the key flight is only reachable through the value flight's access
 const ACCESS={'1':'12'};
 // flights that can still be flown from outside the gate when their launch array is closed
+// alternate access: turns on by itself when the trigger flight is skipped (closed); can be switched by hand
+const ALT_TRIGGER={'3+5+4':'17'};
+let altMan=ld('cider-altman-v1',{});
+const altOn=f=>{if(!getAlt(f))return false;if(f in altMan)return altMan[f];const g=ALT_TRIGGER[f];if(!g)return false;const gi=idxOfFlight(g);return gi>=0&&pairOf(gi).some(j=>skipped.has(j)&&open_(j))};
 const OUTSIDE={'24+25E+25W':'yes','22':'yes','17':'yes','15W+15E':'yes','2E+2W':'yes','12':'yes','WLDY':'yes','14+13':'yes','6':'yes','19+SS':'yes','21+20':'yes','29':'yes','9+10':'yes','7+8':'yes','Off+26+27':'yes',
   '3+5+4':'part'};
 const OUT_NOTE={'3+5+4':'Different route to 3: park outside the gate. 3 from there, likely 5, maybe 4.'};
@@ -375,7 +379,7 @@ items.addEventListener('click',e=>{const it=e.target.closest('.item');if(!it||e.
   if(e.target.tagName==='INPUT'){snap((e.target.checked?'check on ':'uncheck on ')+(n!==undefined?n.replace('Array ',''):fl(k)));const ks=n!==undefined?flightsOf(n):[k];ks.forEach(j=>markDone(j,e.target.checked));save();refresh();return}
   show('map');selArea(n!==undefined?idx[n]:idx[D.order[k].members[0]],true);mapwrap.scrollIntoView({behavior:'smooth'})});
 sortbar.addEventListener('click',e=>{const b=e.target.closest('button');if(!b)return;sortMode=b.dataset.s;try{localStorage.setItem('cider-sort',sortMode)}catch(_){}renderList()});
-reset.onclick=()=>{if(reset.dataset.armed){hist=[];try{localStorage.setItem('cider-hist-v1','[]')}catch(e){}done.clear();skipped.clear();notflown.clear();last=null;plan=D.order.map((o,j)=>j);tags={};save();refresh();reset.textContent='Reset';delete reset.dataset.armed}else{reset.dataset.armed=1;reset.textContent='Tap again to clear';setTimeout(()=>{reset.textContent='Reset';delete reset.dataset.armed},3000)}};
+reset.onclick=()=>{if(reset.dataset.armed){altMan={};try{localStorage.setItem('cider-altman-v1','{}')}catch(e){}hist=[];try{localStorage.setItem('cider-hist-v1','[]')}catch(e){}done.clear();skipped.clear();notflown.clear();last=null;plan=D.order.map((o,j)=>j);tags={};save();refresh();reset.textContent='Reset';delete reset.dataset.armed}else{reset.dataset.armed=1;reset.textContent='Tap again to clear';setTimeout(()=>{reset.textContent='Reset';delete reset.dataset.armed},3000)}};
 function show(v){mapview.style.display=v==='map'?'block':'none';list.style.display=v==='list'?'block':'none';tMap.classList.toggle('on',v==='map');tList.classList.toggle('on',v==='list');if(v==='map')apply()}
 tMap.onclick=()=>show('map');tList.onclick=()=>show('list');
 
@@ -451,15 +455,16 @@ function fitLeg(){if(!legFit){flyTo([minx,miny,maxx-minx,maxy-miny]);return}
   flyTo([x0-m,y0-m,Math.max(x1-x0,300*K)+2*m,Math.max(y1-y0,300*K)+2*m])}
 // ---- traced routes and entrances: baked data plus this phone's edits
 const BAKED={"entrances":{"1":[-78.191876,43.097289],"2":[-78.216988,43.09036],"3":[-78.206056,43.099129],"4":[-78.216924,43.092454],"5":[-78.216519,43.082052],"6":[-78.217632,43.097014],"7":[-78.236073,43.098361],"8":[-78.247036,43.095057],"9":[-78.247154,43.089376],"10":[-78.256491,43.096586],"11":[-78.276564,43.096393],"12":[-78.270795,43.096598],"13":[-78.236074,43.098347],"14":[-78.270791,43.096571],"15":[-78.212646,43.107711],"16":[-78.212728,43.104453],"17":[-78.184333,43.096823],"18":[-78.156204,43.092832],"19":[-78.165502,43.099798],"20":[-78.246601,43.107642],"21":[-78.276554,43.096411],"22":[-78.192775,43.112164],"23":[-78.17734,43.108683]},"routes":{"1>4":[[-78.191876,43.097289],[-78.19217,43.099337],[-78.206056,43.099129],[-78.212489,43.098941],[-78.217636,43.098841],[-78.217632,43.097014],[-78.216924,43.092454]],"4>2":[[-78.216924,43.092454],[-78.216988,43.09036]],"2>5":[[-78.216988,43.09036]],"5>6":[[-78.217632,43.097014]],"6>7":[[-78.217632,43.097014],[-78.217633,43.098816],[-78.235826,43.098399],[-78.236074,43.098347],[-78.235826,43.098399],[-78.235822,43.101067],[-78.232199,43.101442]],"13>8":[[-78.235822,43.101067],[-78.235826,43.098399],[-78.236074,43.098347],[-78.247417,43.098118],[-78.247036,43.095057],[-78.245987,43.094954],[-78.245654,43.095747]],"8>9":[[-78.245654,43.095747],[-78.245987,43.094954],[-78.247036,43.095057]],"9>20":[[-78.247413,43.098118],[-78.246867,43.107077]],"20>14":[[-78.246867,43.107077],[-78.247413,43.098118],[-78.250952,43.098032],[-78.25317,43.096967],[-78.254578,43.096675],[-78.256491,43.096586],[-78.270791,43.096571],[-78.270821,43.09722],[-78.269355,43.097377],[-78.269001,43.10173],[-78.270888,43.101683],[-78.271163,43.103276],[-78.266611,43.103724],[-78.266498,43.105657]],"14>12":[[-78.266498,43.105657],[-78.266611,43.103724],[-78.271163,43.103276],[-78.270888,43.101683]],"12>11":[[-78.269001,43.10173],[-78.269355,43.097377],[-78.270821,43.09722],[-78.270791,43.096571],[-78.276554,43.096411],[-78.276586,43.095923],[-78.275691,43.095979],[-78.275462,43.093282],[-78.271688,43.092992]],"11>21":[[-78.271688,43.092992],[-78.275462,43.093282],[-78.275617,43.09515]],"21>10":[[-78.276554,43.096411],[-78.270791,43.096571],[-78.256491,43.096586]],"10>15":[[-78.256491,43.096586],[-78.254578,43.096675],[-78.25317,43.096967],[-78.250952,43.098032],[-78.236074,43.098347],[-78.235826,43.098399],[-78.217636,43.098841],[-78.217633,43.098816],[-78.212489,43.098941],[-78.212728,43.104453],[-78.212646,43.107711]],"15>16":[[-78.212646,43.107711],[-78.212728,43.104453]],"16>3":[[-78.212728,43.104453],[-78.212489,43.098941],[-78.206056,43.099129]],"3>17":[[-78.206056,43.099129],[-78.19217,43.099337],[-78.185067,43.099532],[-78.184333,43.096823],[-78.183356,43.096827],[-78.18329,43.097256],[-78.18376,43.097384],[-78.183632,43.097803]],"17>18":[[-78.183632,43.097803],[-78.18376,43.097384],[-78.18329,43.097256],[-78.183356,43.096827],[-78.184333,43.096823],[-78.185067,43.099532],[-78.165502,43.099798],[-78.156063,43.099733],[-78.156204,43.092832],[-78.156985,43.092801],[-78.156858,43.094195]],"18>19":[[-78.156858,43.094195],[-78.156985,43.092801],[-78.156204,43.092832],[-78.156063,43.099733],[-78.165699,43.099795],[-78.165502,43.099798]],"19>23":[[-78.165502,43.099798],[-78.185067,43.099532],[-78.184552,43.101212],[-78.183392,43.10268],[-78.180385,43.106109],[-78.17734,43.108683]],"23>22":[[-78.17734,43.108683],[-78.180385,43.106109],[-78.183392,43.10268],[-78.184552,43.101212],[-78.185067,43.099532],[-78.192371,43.099333],[-78.192591,43.102618],[-78.192775,43.112164]],"22>1":[[-78.192775,43.112164],[-78.192565,43.102224],[-78.192371,43.099333],[-78.19217,43.099337],[-78.191876,43.097289]],"7>13":[]}};
-let EDITS={entrances:{},routes:{}};try{EDITS=Object.assign(EDITS,JSON.parse(localStorage.getItem('cider-edits-v1')||'{}'))}catch(e){}
+let EDITS={entrances:{},routes:{},alts:{}};try{EDITS=Object.assign(EDITS,JSON.parse(localStorage.getItem('cider-edits-v1')||'{}'))}catch(e){}
 // drop local edits that are already built into the page, so later baked fixes are not shadowed.
 // When the baked set is updated (BAKED_V bump), every local entry the bake covers is dropped.
 const BAKED_V='5';let bv=null;try{bv=localStorage.getItem('cider-baked-v')}catch(e){}
-for(const g of ['entrances','routes'])for(const k in EDITS[g])if((bv!==BAKED_V&&k in BAKED[g])||JSON.stringify(EDITS[g][k])===JSON.stringify(BAKED[g][k]))delete EDITS[g][k];
+EDITS.alts=EDITS.alts||{};for(const g of ['entrances','routes','alts'])for(const k in EDITS[g])if((bv!==BAKED_V&&k in (BAKED[g]||{}))||JSON.stringify(EDITS[g][k])===JSON.stringify(BAKED[g][k]))delete EDITS[g][k];
 try{localStorage.setItem('cider-baked-v',BAKED_V)}catch(e){}
 try{localStorage.setItem('cider-edits-v1',JSON.stringify(EDITS))}catch(e){}
 const saveEdits=()=>{try{localStorage.setItem('cider-edits-v1',JSON.stringify(EDITS))}catch(e){}};
 const getRoute=k=>{const v=(k in EDITS.routes)?EDITS.routes[k]:BAKED.routes[k];return Array.isArray(v)?v:null};
+const getAlt=f=>{const v=(f in (EDITS.alts||{}))?EDITS.alts[f]:(BAKED.alts||{})[f];return Array.isArray(v)&&v.length?v:null};
 const getEnt=id=>{const v=(id in EDITS.entrances)?EDITS.entrances[id]:BAKED.entrances[id];return v||null};
 const pathLen=L=>{let d=0;for(let i=1;i<L.length;i++)d+=hav(L[i-1],L[i]);return d};
 function drawEnt(s){s=s||vb[2]/svg.getBoundingClientRect().width;gEnt.innerHTML='';const h=6*s;
@@ -471,6 +476,8 @@ let graph=null;dCache.clear();
 function buildGraph(){const G=new Map(),C=new Map(),key=q=>q[0].toFixed(5)+','+q[1].toFixed(5);
   const add=(a,b)=>{const ka=key(a),kb=key(b);if(ka===kb)return;C.set(ka,a);C.set(kb,b);const w=hav(a,b);if(!G.has(ka))G.set(ka,new Map());if(!G.has(kb))G.set(kb,new Map());G.get(ka).set(kb,w);G.get(kb).set(ka,w)};
   LEGS.forEach(l=>{const r=getRoute(l.key);if(!r)return;const P=[[l.from.lon,l.from.lat],...r,[l.to.lon,l.to.lat]];for(let i=0;i<P.length-1;i++)add(P[i],P[i+1])});
+  [...new Set(D.order.map(o=>o.flight))].forEach(f=>{const A=getAlt(f);if(!A)return;let best=null,bd=Infinity;C.forEach(c=>{const d=hav(c,A[0]);if(d<bd){bd=d;best=c}});
+    if(best)add(best,A[0]);for(let i=0;i<A.length-1;i++)add(A[i],A[i+1])});
   graph={G,C,key};return graph}
 function routeBetween(a,b){
   const f=getRoute(a.id+'>'+b.id);if(f)return{pts:f,direct:true};
@@ -491,24 +498,27 @@ function renderNext(){document.querySelectorAll('.poly.next').forEach(p=>p.class
   const k=pick.k;
   const o=D.order[k],t=tolOf(k);o.members.forEach(m=>shapes[idx[m]].pe.classList.add('next'));
   const prevK=(last!==null&&done.has(last))?last:null,p=prevK!==null?tolOf(prevK):D.tols.find(x=>x.base);
-  const rt=p.id!==t.id?routeBetween(p,t):null,route=rt&&rt.pts;
+  const useAlt=altOn(o.flight),A=getAlt(o.flight);let launch=t;
+  if(useAlt){const q=A[A.length-1],[ax,ay]=P(q[0],q[1]);launch={id:'alt:'+o.flight,lon:q[0],lat:q[1],x:ax,y:ay,alt:true}}
+  const rt=p.id!==launch.id?routeBetween(p,launch):null,route=rt&&rt.pts;
   let path=null,lines=[];
-  if(route){path=[[p.lon,p.lat],...route,[t.lon,t.lat]];lines.push(`${distTxt(pathLen(path))} along ${rt.direct?'the traced route':'traced roads'} from the ${TN(p.id)}`);
+  if(route){path=[[p.lon,p.lat],...route,[launch.lon,launch.lat]];lines.push(`${distTxt(pathLen(path))} along ${rt.direct?'the traced route':'traced roads'} from the ${TN(p.id)}`);
     if(me)lines.push(`${distTxt(hav([me.lon,me.lat],[t.lon,t.lat]))} straight-line from you`)}
-  else if(me){path=[[me.lon,me.lat],[t.lon,t.lat]];lines.push(`${distTxt(hav(path[0],path[1]))} straight-line from you`)}
-  else if(p.id!==t.id){path=[[p.lon,p.lat],[t.lon,t.lat]];lines.push(`${distTxt(hav(path[0],path[1]))} straight-line from the ${TN(p.id)}`)}
+  else if(me){path=[[me.lon,me.lat],[launch.lon,launch.lat]];lines.push(`${distTxt(hav(path[0],path[1]))} straight-line from you`)}
+  else if(p.id!==launch.id){path=[[p.lon,p.lat],[launch.lon,launch.lat]];lines.push(`${distTxt(hav(path[0],path[1]))} straight-line from the ${TN(p.id)}`)}
   else lines.push(prevK!==null?'Same TOL as the last flight':'First flight of the day');
-  const ent=getEnt(t.id);if(ent)lines.push('Entrance marked on the map');
+  const ent=useAlt?null:getEnt(t.id);if(useAlt)lines.push('Alternate access: park outside the gate and launch from there');else if(ent)lines.push('Entrance marked on the map');
   if(outTxt(o.flight))lines.push(outTxt(o.flight));
   const tag=pick.mode==='moved'?'<span class="tag mv">Moved up</span>':pick.mode==='reopened'?'<span class="tag mv">Reopened</span>':pick.mode==='return'?'<span class="tag sk">Skipped earlier</span>':'';
   const sk=[];new Set([...skipped].filter(j=>open_(j)&&j!==k).map(j=>pairOf(j)[0])).forEach(j=>{const g=gateOf(j);if(g>=0&&skipped.has(g)&&open_(g))return;sk.push(j)});
   const skLabel=j=>{const deps=dependentsOf(j).filter(d=>skipped.has(d)&&open_(d)).map(d=>D.order[d].flight);return D.order[j].flight+(deps.length?' + '+deps.join(' + '):'')};
   next.innerHTML=`<div class="lab">Next up · #${k+1} of ${D.order.length}</div><div class="fl">${o.flight}${tag}</div>
    <div class="meta">${TN(t.id)} · ${acr(o).toFixed(0)} ac · ~${o.min} min${o.note?' · '+o.note:''}</div>${lines.map(l=>`<div class="meta">${l}</div>`).join('')}
-   <div class="btns"><a href="${dir((ent||[0,t.lat])[1],(ent||[t.lon])[0])}" target="_blank" rel="noopener">Directions${ent?' to gate':''}</a><button id="nskip" class="skip">${pick.mode==='return'?'Not flown':'Skip'}</button><button id="ndone" class="done">Done &#10003;</button></div>
+   ${A?`<button id="nalt" class="skip" style="width:100%;margin-top:8px;border:1px solid ${useAlt?'#7c3aed':'var(--line)'};background:${useAlt?'#f3edfd':'#fff'};color:${useAlt?'#5b21b6':'var(--ink)'};border-radius:9px;padding:9px;font:inherit;font-size:13.5px;font-weight:600">${useAlt?'&#10003; Using alternate access':'Use alternate access'}</button>`:''}
+   <div class="btns"><a href="${useAlt?dir(launch.lat,launch.lon):dir((ent||[0,t.lat])[1],(ent||[t.lon])[0])}" target="_blank" rel="noopener">Directions${useAlt?' to parking':ent?' to gate':''}</a><button id="nskip" class="skip">${pick.mode==='return'?'Not flown':'Skip'}</button><button id="ndone" class="done">Done &#10003;</button></div>
    ${sk.length?`<div class="skips">Skipped: ${sk.sort((a,b)=>a-b).map(j=>`<button data-fly="${j}">${skLabel(j)} · Open again</button>`).join('')}</div>`:''}${backBtn()}`;
   const sameTol=prevK!==null&&p.id===t.id;
-  legFit={path,t,next:o.members,prev:(prevK!==null&&!sameTol)?D.order[prevK].members:[],sameTol};
+  legFit={path,t:launch,next:o.members,prev:(prevK!==null&&!sameTol)?D.order[prevK].members:[],sameTol};
   ndone.onclick=()=>{snap('Done on '+fl(k));markDone(k,true);save();refresh();fitLeg()};
   nskip.onclick=()=>{if(OUTSIDE[o.flight]==='yes'&&pick.mode!=='return'&&!nskip.dataset.armed){nskip.dataset.armed=1;nskip.textContent='Skip anyway?';setTimeout(()=>{if(document.body.contains(nskip)){delete nskip.dataset.armed;nskip.textContent='Skip'}},4000);return}
     snap((pick.mode==='return'?'Not flown on ':'Skip on ')+D.order[k].flight);const pr=pairOf(k).filter(open_);
@@ -517,8 +527,9 @@ function renderNext(){document.querySelectorAll('.poly.next').forEach(p=>p.class
     else{const dep=dependentsOf(k).flatMap(d=>pairOf(d).filter(open_));[...pr,...dep].forEach(j=>{skipped.add(j);delete tags[j]})}
     save();refresh();fitLeg()};
   wireBack();
+  const na=document.getElementById('nalt');if(na)na.onclick=()=>{altMan[o.flight]=!useAlt;try{localStorage.setItem('cider-altman-v1',JSON.stringify(altMan))}catch(e){}renderNext();fitLeg()};
   next.querySelectorAll('[data-fly]').forEach(b=>b.onclick=()=>{snap('Open again on '+skLabel(+b.dataset.fly));reinsert(+b.dataset.fly)});
-  const ring=el('circle',{cx:t.x,cy:t.y,r:1,class:'nextring'});gNext.appendChild(ring);
+  const ring=el('circle',{cx:launch.x,cy:launch.y,r:1,class:'nextring'});gNext.appendChild(ring);
   let line=null,dot=null,xy=null,cum=null;
   if(path){xy=path.map(q=>P(q[0],q[1]));cum=[0];for(let i=1;i<xy.length;i++)cum.push(cum[i-1]+Math.hypot(xy[i][0]-xy[i-1][0],xy[i][1]-xy[i-1][1]));
     line=el('polyline',{points:xy.map(q=>q.join(',')).join(' '),class:'nextln','stroke-linejoin':'round'});dot=el('circle',{cx:xy[0][0],cy:xy[0][1],r:1,class:'nextdot'});gNext.appendChild(line);gNext.appendChild(dot)}
@@ -538,18 +549,29 @@ let editOn=false,emodeV='route';
 const LEGS=[];{const seen=new Set(),B=D.tols.find(x=>x.base),t0=tolOf(0);if(B.id!==t0.id){seen.add(B.id+'>'+t0.id);LEGS.push({key:B.id+'>'+t0.id,from:B,to:t0,label:`Start: Base to #1 ${D.order[0].flight}`})}for(let k=1;k<D.order.length;k++){const p=tolOf(k-1),t=tolOf(k);if(p.id===t.id)continue;const key=p.id+'>'+t.id;if(seen.has(key))continue;seen.add(key);
   LEGS.push({key,from:p,to:t,label:`#${k} ${D.order[k-1].flight} to #${k+1} ${D.order[k].flight}`})}}
 const ETOLS=[];{const seen=new Set();D.order.forEach((o,k)=>{const t=tolOf(k);if(!seen.has(t.id)){seen.add(t.id);ETOLS.push({t,label:`${TN(t.id)} (${o.flight})`})}})}
+const AFL=[...new Set(D.order.map(o=>o.flight))];
 function fillSel(keep){const v=keep?esel.value:null;
+  if(emodeV==='alt'){esel.innerHTML=AFL.map(f=>`<option value="${f}">${getAlt(f)?'✓ ':''}${f}</option>`).join('');esel.value=v||'3+5+4';
+    ehint.textContent='Tap along the way in, starting on a road you have already traced. Your last tap is where you park and launch.';
+    estat.textContent=`${AFL.filter(f=>getAlt(f)).length} alternate access route${AFL.filter(f=>getAlt(f)).length===1?'':'s'}`;return}
   esel.innerHTML=emodeV==='route'?LEGS.map(l=>`<option value="${l.key}">${getRoute(l.key)?'✓ ':''}${l.label}</option>`).join('')
     :ETOLS.map(e=>`<option value="${e.t.id}">${getEnt(e.t.id)?'✓ ':''}${e.label}</option>`).join('');
   if(v)esel.value=v;
   ehint.textContent=emodeV==='route'?'Tap points along the road from the start TOL to the end TOL. The line joins both TOLs automatically.':'Tap where you turn off the road into this array. Tap again to move it.';
   const nr=LEGS.filter(l=>getRoute(l.key)).length,ne=D.tols.filter(t=>getEnt(t.id)).length;estat.textContent=`${nr} of ${LEGS.length} routes traced · ${ne} entrance${ne===1?'':'s'} placed`}
 function curLeg(){return LEGS.find(l=>l.key===esel.value)}
-function curRoute(){const k=esel.value;return ((k in EDITS.routes)?EDITS.routes[k]:BAKED.routes[k])||[]}
-function focusSel(){if(emodeV==='route'){const l=curLeg();if(!l)return;const pts=[[l.from.x,l.from.y],[l.to.x,l.to.y],...curRoute().map(q=>P(q[0],q[1]))],xs=pts.map(q=>q[0]),ys=pts.map(q=>q[1]),m=200*K;
+function curRoute(){const k=esel.value;if(emodeV==='alt')return ((k in EDITS.alts)?EDITS.alts[k]:(BAKED.alts||{})[k])||[];return ((k in EDITS.routes)?EDITS.routes[k]:BAKED.routes[k])||[]}
+const flTol=f=>tolOf(idxOfFlight(f));
+function focusSel(){if(emodeV==='alt'){const T=flTol(esel.value),pts=[[T.x,T.y],...curRoute().map(q=>P(q[0],q[1]))],xs=pts.map(q=>q[0]),ys=pts.map(q=>q[1]),m=400*K;
+    flyTo([Math.min(...xs)-m,Math.min(...ys)-m,Math.max(...xs)-Math.min(...xs)+2*m,Math.max(...ys)-Math.min(...ys)+2*m]);return}
+  if(emodeV==='route'){const l=curLeg();if(!l)return;const pts=[[l.from.x,l.from.y],[l.to.x,l.to.y],...curRoute().map(q=>P(q[0],q[1]))],xs=pts.map(q=>q[0]),ys=pts.map(q=>q[1]),m=200*K;
     flyTo([Math.min(...xs)-m,Math.min(...ys)-m,Math.max(...xs)-Math.min(...xs)+2*m,Math.max(...ys)-Math.min(...ys)+2*m])}
   else{const t=tolById[+esel.value];flyTo([t.x-400*K,t.y-400*K,800*K,800*K])}}
 function drawEdit(s){s=s||vb[2]/svg.getBoundingClientRect().width;gEdit.innerHTML='';if(!editOn)return;
+  if(emodeV==='alt'){const T=flTol(esel.value),r=curRoute();gEdit.appendChild(el('circle',{cx:T.x,cy:T.y,r:16*s,class:'ering',style:'stroke:#e8590c'}));
+    if(r.length){const xy=r.map(q=>P(q[0],q[1]));if(xy.length>1)gEdit.appendChild(el('polyline',{points:xy.map(q=>q.join(',')).join(' '),class:'trcur',style:'stroke:#7c3aed'}));
+      xy.forEach((q,i)=>gEdit.appendChild(el('circle',{cx:q[0],cy:q[1],r:(i===xy.length-1?9:5)*s,class:'vtx',style:i===xy.length-1?'fill:#7c3aed;stroke:#fff':'stroke:#7c3aed'})))}
+    return}
   if(emodeV==='route'){LEGS.forEach(l=>{if(l.key===esel.value)return;const r=getRoute(l.key);if(!r)return;
       gEdit.appendChild(el('polyline',{points:[[l.from.lon,l.from.lat],...r,[l.to.lon,l.to.lat]].map(q=>P(q[0],q[1]).join(',')).join(' '),class:'trfaint'}))});
     const l=curLeg();if(!l)return;const r=curRoute(),xy=[[l.from.x,l.from.y],...r.map(q=>P(q[0],q[1])),[l.to.x,l.to.y]];
@@ -558,7 +580,7 @@ function drawEdit(s){s=s||vb[2]/svg.getBoundingClientRect().width;gEdit.innerHTM
     [l.from,l.to].forEach(t=>gEdit.appendChild(el('circle',{cx:t.x,cy:t.y,r:16*s,class:'ering',style:'stroke:#e8590c'})))}
   else{const t=tolById[+esel.value];if(t)gEdit.appendChild(el('circle',{cx:t.x,cy:t.y,r:16*s,class:'ering'}))}}
 function editTap(lon,lat){const p=[+lon.toFixed(6),+lat.toFixed(6)];
-  if(emodeV==='route'){EDITS.routes[esel.value]=[...curRoute(),p]}else{EDITS.entrances[esel.value]=p}
+  if(emodeV==='alt'){EDITS.alts[esel.value]=[...curRoute(),p]}else if(emodeV==='route'){EDITS.routes[esel.value]=[...curRoute(),p]}else{EDITS.entrances[esel.value]=p}
   saveEdits();graph=null;dCache.clear();fillSel(true);drawEdit();drawEnt();eout.style.display='none'}
 bedit.onclick=()=>{editOn=!editOn;bedit.classList.toggle('on',editOn);edit.style.display=editOn?'block':'none';
   if(editOn){if(!showImg){showImg=true;tiles()}fillSel();focusSel();mapwrap.scrollIntoView({behavior:'smooth',block:'start'})}
@@ -566,10 +588,10 @@ bedit.onclick=()=>{editOn=!editOn;bedit.classList.toggle('on',editOn);edit.style
 eexit.onclick=()=>bedit.onclick();
 emode.addEventListener('click',e=>{const b=e.target.closest('button');if(!b)return;emodeV=b.dataset.m;emode.querySelectorAll('button').forEach(x=>x.classList.toggle('on',x===b));fillSel();focusSel();drawEdit()});
 esel.onchange=()=>{focusSel();drawEdit()};
-eundo.onclick=()=>{graph=null;dCache.clear();if(emodeV==='route'){const r=curRoute().slice(0,-1);EDITS.routes[esel.value]=r.length?r:null}else EDITS.entrances[esel.value]=null;saveEdits();fillSel(true);drawEdit();drawEnt()};
+eundo.onclick=()=>{graph=null;dCache.clear();if(emodeV==='alt'){const r=curRoute().slice(0,-1);EDITS.alts[esel.value]=r.length?r:null}else if(emodeV==='route'){const r=curRoute().slice(0,-1);EDITS.routes[esel.value]=r.length?r:null}else EDITS.entrances[esel.value]=null;saveEdits();fillSel(true);drawEdit();drawEnt()};
 eclear.onclick=()=>{if(!eclear.dataset.armed){eclear.dataset.armed=1;eclear.textContent='Tap to confirm';setTimeout(()=>{eclear.textContent='Clear';delete eclear.dataset.armed},3000);return}
-  delete eclear.dataset.armed;eclear.textContent='Clear';graph=null;dCache.clear();if(emodeV==='route')EDITS.routes[esel.value]=null;else EDITS.entrances[esel.value]=null;saveEdits();fillSel(true);drawEdit();drawEnt()};
-ecopy.onclick=async()=>{const out={entrances:{},routes:{}};
+  delete eclear.dataset.armed;eclear.textContent='Clear';graph=null;dCache.clear();if(emodeV==='alt')EDITS.alts[esel.value]=null;else if(emodeV==='route')EDITS.routes[esel.value]=null;else EDITS.entrances[esel.value]=null;saveEdits();fillSel(true);drawEdit();drawEnt()};
+ecopy.onclick=async()=>{const out={entrances:{},routes:{},alts:{}};AFL.forEach(f=>{const a=getAlt(f);if(a)out.alts[f]=a});
   D.tols.forEach(t=>{const e=getEnt(t.id);if(e)out.entrances[t.id]=e});LEGS.forEach(l=>{const r=getRoute(l.key);if(r)out.routes[l.key]=r});
   const txt='Cider guide edits v1\n'+JSON.stringify(out);eout.value=txt;
   try{await navigator.clipboard.writeText(txt);estat.textContent='Copied. Paste it into the chat with Claude to make it permanent.';eout.style.display='none'}
