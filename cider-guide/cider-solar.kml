@@ -1,0 +1,1026 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<kml xmlns="http://www.opengis.net/kml/2.2" xmlns:gx="http://www.google.com/kml/ext/2.2" xmlns:kml="http://www.opengis.net/kml/2.2" xmlns:atom="http://www.w3.org/2005/Atom">
+<Document>
+	<name>Cider Solar Field Guide.kml</name>
+	<StyleMap id="__managed_style_18058DF2223F28E1DA1B">
+		<Pair>
+			<key>normal</key>
+			<styleUrl>#default</styleUrl>
+		</Pair>
+		<Pair>
+			<key>highlight</key>
+			<styleUrl>#default2</styleUrl>
+		</Pair>
+	</StyleMap>
+	<StyleMap id="__managed_style_18058DF2223F28E1DA1B0">
+		<Pair>
+			<key>normal</key>
+			<styleUrl>#default1</styleUrl>
+		</Pair>
+		<Pair>
+			<key>highlight</key>
+			<styleUrl>#default0</styleUrl>
+		</Pair>
+	</StyleMap>
+	<StyleMap id="__managed_style_18058DF2223F28E1DA1B1">
+		<Pair>
+			<key>normal</key>
+			<styleUrl>#__managed_style_21BEA9B7DD3F28E1DA1B</styleUrl>
+		</Pair>
+		<Pair>
+			<key>highlight</key>
+			<styleUrl>#__managed_style_3A1625E1DF3F28E1DA1B</styleUrl>
+		</Pair>
+	</StyleMap>
+	<gx:CascadingStyle kml:id="__managed_style_21BEA9B7DD3F28E1DA1B">
+		<Style>
+			<IconStyle>
+				<Icon>
+					<href>https://earth.google.com/earth/document/icon?color=ffee58&amp;id=2157&amp;scale=4</href>
+				</Icon>
+				<hotSpot x="64" y="128" xunits="pixels" yunits="insetPixels"/>
+			</IconStyle>
+			<LineStyle>
+				<color>ff2dc0fb</color>
+				<width>1.33333</width>
+			</LineStyle>
+			<PolyStyle>
+				<color>40ffffff</color>
+			</PolyStyle>
+		</Style>
+	</gx:CascadingStyle>
+	<gx:CascadingStyle kml:id="__managed_style_3A1625E1DF3F28E1DA1B">
+		<Style>
+			<IconStyle>
+				<scale>1.2</scale>
+				<Icon>
+					<href>https://earth.google.com/earth/document/icon?color=ffee58&amp;id=2157&amp;scale=4</href>
+				</Icon>
+				<hotSpot x="64" y="128" xunits="pixels" yunits="insetPixels"/>
+			</IconStyle>
+			<LineStyle>
+				<color>ff2dc0fb</color>
+				<width>2</width>
+			</LineStyle>
+			<PolyStyle>
+				<color>40ffffff</color>
+			</PolyStyle>
+		</Style>
+	</gx:CascadingStyle>
+	<Style id="default">
+		<IconStyle>
+			<Icon>
+				<href>https://earth.google.com/earth/document/icon?color=ffee58&amp;id=2157&amp;scale=4</href>
+			</Icon>
+			<hotSpot x="64" y="128" xunits="pixels" yunits="insetPixels"/>
+		</IconStyle>
+		<LineStyle>
+			<color>ff2dc0fb</color>
+			<width>1.33333</width>
+		</LineStyle>
+		<PolyStyle>
+			<color>40ffffff</color>
+		</PolyStyle>
+		<gx:IconStackStyle>
+		</gx:IconStackStyle>
+	</Style>
+	<Style id="default0">
+		<IconStyle>
+			<scale>1.2</scale>
+			<Icon>
+				<href>https://earth.google.com/earth/document/icon?color=ffee58&amp;id=2157&amp;scale=4</href>
+			</Icon>
+			<hotSpot x="64" y="128" xunits="pixels" yunits="insetPixels"/>
+		</IconStyle>
+		<LineStyle>
+			<color>ff2dc0fb</color>
+			<width>2</width>
+		</LineStyle>
+		<PolyStyle>
+			<color>40ffffff</color>
+		</PolyStyle>
+	</Style>
+	<Style id="default1">
+		<IconStyle>
+			<Icon>
+				<href>https://earth.google.com/earth/document/icon?color=ffee58&amp;id=2157&amp;scale=4</href>
+			</Icon>
+			<hotSpot x="64" y="128" xunits="pixels" yunits="insetPixels"/>
+		</IconStyle>
+		<LineStyle>
+			<color>ff2dc0fb</color>
+			<width>1.33333</width>
+		</LineStyle>
+		<PolyStyle>
+			<color>40ffffff</color>
+		</PolyStyle>
+	</Style>
+	<Style id="default2">
+		<IconStyle>
+			<scale>1.2</scale>
+			<Icon>
+				<href>https://earth.google.com/earth/document/icon?color=ffee58&amp;id=2157&amp;scale=4</href>
+			</Icon>
+			<hotSpot x="64" y="128" xunits="pixels" yunits="insetPixels"/>
+		</IconStyle>
+		<LineStyle>
+			<color>ff2dc0fb</color>
+			<width>2</width>
+		</LineStyle>
+		<PolyStyle>
+			<color>40ffffff</color>
+		</PolyStyle>
+		<gx:IconStackStyle>
+		</gx:IconStackStyle>
+	</Style>
+	<Style id="inline461">
+		<LineStyle>
+			<color>ff0000ff</color>
+			<width>5</width>
+		</LineStyle>
+		<PolyStyle>
+			<fill>0</fill>
+		</PolyStyle>
+	</Style>
+	<Style id="inline78">
+		<LineStyle>
+			<color>ff0000ff</color>
+			<width>5</width>
+		</LineStyle>
+		<PolyStyle>
+			<fill>0</fill>
+		</PolyStyle>
+	</Style>
+	<StyleMap id="inline98">
+		<Pair>
+			<key>normal</key>
+			<styleUrl>#inline78</styleUrl>
+		</Pair>
+		<Pair>
+			<key>highlight</key>
+			<styleUrl>#inline461</styleUrl>
+		</Pair>
+	</StyleMap>
+		<Style id="tolStyle"><IconStyle><color>ffd84e1d</color><scale>0.9</scale><Icon><href>http://maps.google.com/mapfiles/kml/shapes/placemark_circle.png</href></Icon></IconStyle><LabelStyle><scale>0.8</scale></LabelStyle></Style>
+	<Style id="baseStyle"><IconStyle><color>ff1c1cb9</color><scale>1.1</scale><Icon><href>http://maps.google.com/mapfiles/kml/shapes/placemark_circle.png</href></Icon></IconStyle><LabelStyle><scale>0.9</scale></LabelStyle></Style>
+	<Style id="chainStyle"><LineStyle><color>ffd84e1d</color><width>3</width></LineStyle></Style>
+	<Folder>
+		<name>Cider Solar Field Guide</name>
+		<Folder>
+			<name>Areas</name>
+			<Placemark>
+			<name>CiderOffices</name>
+			<snippet></snippet>
+				<description>9.9 ac. Launch from Base. Flight Off+26+27, #26 in capture order.</description>
+			<styleUrl>#inline98</styleUrl>
+			<Polygon>
+				<tessellate>1</tessellate>
+				<altitudeMode>relativeToGround</altitudeMode>
+				<outerBoundaryIs>
+					<LinearRing>
+						<altitudeMode>relativeToGround</altitudeMode>
+						<coordinates>
+							-78.19726958510768,43.09711939647767,0 -78.19766257891673,43.097878047683,-7.081154781429788e-10 -78.1967088392642,43.09828393882858,0 -78.19512709988527,43.09872221499673,0 -78.19340334014372,43.09905909526956,-7.081154781429788e-10 -78.1928815652651,43.09899898234054,0 -78.19255814139579,43.09843929140715,0 -78.19726958510768,43.09711939647767,0 
+						</coordinates>
+					</LinearRing>
+				</outerBoundaryIs>
+			</Polygon>
+		</Placemark>
+			<Placemark>
+			<name>CiderWestLayDownYard</name>
+			<snippet></snippet>
+				<description>3.6 ac. Launch from West Laydown TOL. Flight WLDY, #15 in capture order.</description>
+			<styleUrl>#inline98</styleUrl>
+			<Polygon>
+				<tessellate>1</tessellate>
+				<altitudeMode>relativeToGround</altitudeMode>
+				<outerBoundaryIs>
+					<LinearRing>
+						<altitudeMode>relativeToGround</altitudeMode>
+						<coordinates>
+							-78.2774557050857,43.09615229336229,0 -78.27572518881735,43.09613218354154,0 -78.27571449333058,43.09517517526296,0 -78.27733909151479,43.09518484585134,0 -78.2774557050857,43.09615229336229,0 
+						</coordinates>
+					</LinearRing>
+				</outerBoundaryIs>
+			</Polygon>
+		</Placemark>
+			<Placemark>
+			<name>CiderSubStation</name>
+			<snippet></snippet>
+				<description>6.9 ac. Launch from Substation TOL. Flight 19+SS, #18 in capture order.</description>
+			<styleUrl>#inline98</styleUrl>
+			<Polygon>
+				<tessellate>1</tessellate>
+				<altitudeMode>relativeToGround</altitudeMode>
+				<outerBoundaryIs>
+					<LinearRing>
+						<altitudeMode>relativeToGround</altitudeMode>
+						<coordinates>
+							-78.21546323010077,43.1041896636253,-7.081154781429788e-10 -78.21548799658076,43.1053180959042,-2.124346434428936e-09 -78.21831598047044,43.1052222676423,-7.081154781429788e-10 -78.21822891442083,43.10413139810353,-7.081154781429788e-10 -78.21546323010077,43.1041896636253,-7.081154781429788e-10 
+						</coordinates>
+					</LinearRing>
+				</outerBoundaryIs>
+			</Polygon>
+		</Placemark>
+			<Placemark>
+			<name>CiderArray01</name>
+			<snippet></snippet>
+				<description>137.6 ac. Launch from Array 01 TOL. Flight 1, #13 in capture order.</description>
+			<styleUrl>#inline98</styleUrl>
+			<Polygon>
+				<tessellate>1</tessellate>
+				<altitudeMode>relativeToGround</altitudeMode>
+				<outerBoundaryIs>
+					<LinearRing>
+						<altitudeMode>relativeToGround</altitudeMode>
+						<coordinates>
+							-78.27039053746421,43.10314592006166,-7.081154781429788e-10 -78.26497175677197,43.10313389425255,0 -78.26097055665058,43.10308097609038,0 -78.2532272493181,43.10329871096893,0 -78.25320751092312,43.10585193879825,0 -78.25082529010393,43.10585169782393,0 -78.25080632823166,43.10669332682063,1.416230956285958e-09 -78.25169482996249,43.10706064738027,-7.081154781429788e-10 -78.25428906713041,43.10743876667876,-7.081154781429788e-10 -78.25589256683149,43.10744381551517,0 -78.26241561076102,43.1066958059212,-7.081154781429788e-10 -78.26488212928807,43.10619747085651,-7.081154781429788e-10 -78.267479321886,43.10616442247802,0 -78.27043922458169,43.10403340728423,-7.081154781429788e-10 -78.27039053746421,43.10314592006166,-7.081154781429788e-10 
+						</coordinates>
+					</LinearRing>
+				</outerBoundaryIs>
+			</Polygon>
+		</Placemark>
+			<Placemark>
+			<name>CiderArray02W</name>
+			<snippet></snippet>
+				<description>51.6 ac. Launch from Array 02E TOL. Flight 2E+2W, #11 in capture order.</description>
+			<styleUrl>#inline98</styleUrl>
+			<Polygon>
+				<tessellate>1</tessellate>
+				<altitudeMode>relativeToGround</altitudeMode>
+				<outerBoundaryIs>
+					<LinearRing>
+						<altitudeMode>relativeToGround</altitudeMode>
+						<coordinates>
+							-78.24661970638091,43.11033169653426,-7.081154781429788e-10 -78.2539813070439,43.11034470863058,0 -78.25423828696606,43.10769636926967,0 -78.24936034558704,43.10696035233207,0 -78.24736448620061,43.10698349369586,-7.081154781429788e-10 -78.24653710410068,43.10869511304195,0 -78.24661970638091,43.11033169653426,-7.081154781429788e-10 
+						</coordinates>
+					</LinearRing>
+				</outerBoundaryIs>
+			</Polygon>
+		</Placemark>
+			<Placemark>
+			<name>CiderArray02E</name>
+			<snippet></snippet>
+				<description>25.6 ac. Launch from Array 02E TOL. Flight 2E+2W, #11 in capture order.</description>
+			<styleUrl>#inline98</styleUrl>
+			<Polygon>
+				<tessellate>1</tessellate>
+				<altitudeMode>relativeToGround</altitudeMode>
+				<outerBoundaryIs>
+					<LinearRing>
+						<altitudeMode>relativeToGround</altitudeMode>
+						<coordinates>
+							-78.24641516195209,43.10587109406622,0 -78.24280192510879,43.10592165320538,-7.081154781429788e-10 -78.24298881205375,43.10934293562632,0 -78.24567126035419,43.10928437744106,-7.081154781429788e-10 -78.24645731674535,43.1076164906559,0 -78.24641516195209,43.10587109406622,0 
+						</coordinates>
+					</LinearRing>
+				</outerBoundaryIs>
+			</Polygon>
+		</Placemark>
+			<Placemark>
+			<name>CiderArray03</name>
+			<snippet></snippet>
+				<description>25.7 ac. Launch from Array 04 TOL. Flight 3+5+4, #7 in capture order.</description>
+			<styleUrl>#inline98</styleUrl>
+			<Polygon>
+				<tessellate>1</tessellate>
+				<altitudeMode>relativeToGround</altitudeMode>
+				<outerBoundaryIs>
+					<LinearRing>
+						<altitudeMode>relativeToGround</altitudeMode>
+						<coordinates>
+							-78.23363598305852,43.10976844612823,0 -78.23021618875244,43.10974519752489,0 -78.2282646357549,43.110107821328,-7.081154781429788e-10 -78.22827337310561,43.11056449299574,0 -78.22871087932495,43.11241919509093,0 -78.22999094993433,43.11242305639148,-7.081154781429788e-10 -78.23109845895762,43.11215925948478,0 -78.23378063538807,43.11102291228507,-7.081154781429788e-10 -78.23363598305852,43.10976844612823,0 
+						</coordinates>
+					</LinearRing>
+				</outerBoundaryIs>
+			</Polygon>
+		</Placemark>
+			<Placemark>
+			<name>CiderArray04</name>
+			<snippet></snippet>
+				<description>70.4 ac. Launch from Array 04 TOL. Flight 3+5+4, #7 in capture order.</description>
+			<styleUrl>#inline98</styleUrl>
+			<Polygon>
+				<tessellate>1</tessellate>
+				<altitudeMode>relativeToGround</altitudeMode>
+				<outerBoundaryIs>
+					<LinearRing>
+						<altitudeMode>relativeToGround</altitudeMode>
+						<coordinates>
+							-78.22725796307535,43.1038603802501,-7.081154781429788e-10 -78.23260678783456,43.10371695166049,-7.081154781429788e-10 -78.23909674713531,43.10374359124537,0 -78.23916207475222,43.10524420017581,-7.081154781429788e-10 -78.23178815067949,43.10727753683369,-7.081154781429788e-10 -78.22966630224036,43.10725992915704,0 -78.22724950803332,43.10489888065307,-7.081154781429788e-10 -78.22725796307535,43.1038603802501,-7.081154781429788e-10 
+						</coordinates>
+					</LinearRing>
+				</outerBoundaryIs>
+			</Polygon>
+		</Placemark>
+			<Placemark>
+			<name>CiderArray05</name>
+			<snippet></snippet>
+				<description>20.3 ac. Launch from Array 04 TOL. Flight 3+5+4, #7 in capture order.</description>
+			<styleUrl>#inline98</styleUrl>
+			<Polygon>
+				<tessellate>1</tessellate>
+				<altitudeMode>relativeToGround</altitudeMode>
+				<outerBoundaryIs>
+					<LinearRing>
+						<altitudeMode>relativeToGround</altitudeMode>
+						<coordinates>
+							-78.22305138727108,43.10867383056235,-7.081154781429788e-10 -78.22460734699514,43.1086857534336,1.416230956285958e-09 -78.22696689151995,43.10794660410765,-7.081154781429788e-10 -78.22812033037498,43.10747900691987,-7.081154781429788e-10 -78.22811764087672,43.10681315323332,-7.081154781429788e-10 -78.22710029984449,43.10568353532135,-1.416230956285958e-09 -78.22580327724533,43.10568008482088,-7.081154781429788e-10 -78.22578854837789,43.1061766037261,-1.416230956285958e-09 -78.22304981122308,43.1078042393062,-7.081154781429788e-10 -78.22305138727108,43.10867383056235,-7.081154781429788e-10 
+						</coordinates>
+					</LinearRing>
+				</outerBoundaryIs>
+			</Polygon>
+		</Placemark>
+			<Placemark>
+			<name>CiderArray06</name>
+			<snippet></snippet>
+				<description>38.9 ac. Launch from Array 06 TOL. Flight 6, #17 in capture order.</description>
+			<styleUrl>#inline98</styleUrl>
+			<Polygon>
+				<tessellate>1</tessellate>
+				<altitudeMode>relativeToGround</altitudeMode>
+				<outerBoundaryIs>
+					<LinearRing>
+						<altitudeMode>relativeToGround</altitudeMode>
+						<coordinates>
+							-78.21236073471485,43.10778121573243,1.416230956285958e-09 -78.20758681571608,43.10975748972053,-7.081154781429788e-10 -78.20376113004107,43.10976368535352,0 -78.20376765760564,43.10892342653059,0 -78.20428357364729,43.10856390078258,-7.081154781429788e-10 -78.20507590320419,43.10819082040374,0 -78.21060396957967,43.10617229096275,0 -78.21232856400496,43.10618565915821,0 -78.21236073471485,43.10778121573243,1.416230956285958e-09 
+						</coordinates>
+					</LinearRing>
+				</outerBoundaryIs>
+			</Polygon>
+		</Placemark>
+			<Placemark>
+			<name>CiderArray07</name>
+			<snippet></snippet>
+				<description>29.9 ac. Launch from Array 08 TOL. Flight 7+8, #25 in capture order.</description>
+			<styleUrl>#inline98</styleUrl>
+			<Polygon>
+				<tessellate>1</tessellate>
+				<altitudeMode>relativeToGround</altitudeMode>
+				<outerBoundaryIs>
+					<LinearRing>
+						<altitudeMode>relativeToGround</altitudeMode>
+						<coordinates>
+							-78.19766224021257,43.11448879853975,-7.081154781429788e-10 -78.197548722592,43.1111839226719,0 -78.19663707014854,43.11052618092176,0 -78.19466638534787,43.11052570257746,0 -78.19329007843015,43.11129645764787,0 -78.1933014602124,43.11207201135068,0 -78.19355408069943,43.11289139026586,0 -78.19534695911372,43.11394160615905,0 -78.19602322303375,43.11430166549361,0 -78.19766224021257,43.11448879853975,-7.081154781429788e-10 
+						</coordinates>
+					</LinearRing>
+				</outerBoundaryIs>
+			</Polygon>
+		</Placemark>
+			<Placemark>
+			<name>CiderArray08</name>
+			<snippet></snippet>
+				<description>35.7 ac. Launch from Array 08 TOL. Flight 7+8, #25 in capture order.</description>
+			<styleUrl>#inline98</styleUrl>
+			<Polygon>
+				<tessellate>1</tessellate>
+				<altitudeMode>relativeToGround</altitudeMode>
+				<outerBoundaryIs>
+					<LinearRing>
+						<altitudeMode>relativeToGround</altitudeMode>
+						<coordinates>
+							-78.18719845840562,43.11386017328459,-7.081154781429788e-10 -78.1912001556894,43.11383058135561,0 -78.19224824360923,43.11220249642497,0 -78.19195615706187,43.11046705670057,0 -78.18718753444936,43.11046041292512,-7.081154781429788e-10 -78.18719845840562,43.11386017328459,-7.081154781429788e-10 
+						</coordinates>
+					</LinearRing>
+				</outerBoundaryIs>
+			</Polygon>
+		</Placemark>
+			<Placemark>
+			<name>CiderArray09</name>
+			<snippet></snippet>
+				<description>40.8 ac. Launch from Array 10 TOL. Flight 9+10, #24 in capture order.</description>
+			<styleUrl>#inline98</styleUrl>
+			<Polygon>
+				<tessellate>1</tessellate>
+				<altitudeMode>relativeToGround</altitudeMode>
+				<outerBoundaryIs>
+					<LinearRing>
+						<altitudeMode>relativeToGround</altitudeMode>
+						<coordinates>
+							-78.1883991826024,43.1047880602228,0 -78.18323685421943,43.1047574045439,0 -78.18136250338165,43.10723747061031,-7.081154781429788e-10 -78.18136987214234,43.1084251107019,-1.416230956285958e-09 -78.18191299290265,43.10841703653144,0 -78.18838733964155,43.10684666854775,0 -78.1883991826024,43.1047880602228,0 
+						</coordinates>
+					</LinearRing>
+				</outerBoundaryIs>
+			</Polygon>
+		</Placemark>
+			<Placemark>
+			<name>CiderArray10</name>
+			<snippet></snippet>
+				<description>98.8 ac. Launch from Array 10 TOL. Flight 9+10, #24 in capture order.</description>
+			<styleUrl>#inline98</styleUrl>
+			<Polygon>
+				<tessellate>1</tessellate>
+				<altitudeMode>relativeToGround</altitudeMode>
+				<outerBoundaryIs>
+					<LinearRing>
+						<altitudeMode>relativeToGround</altitudeMode>
+						<coordinates>
+							-78.17794421216659,43.10536387563141,-7.081154781429788e-10 -78.16770139187221,43.10529542691349,0 -78.16349807098958,43.106268904044,-7.081154781429788e-10 -78.16345307718839,43.10797770056273,0 -78.16583610684361,43.10796028395454,0 -78.16984962438023,43.10907373949102,-7.081154781429788e-10 -78.1753597094965,43.10904554829831,0 -78.1762055407392,43.10831739926964,-7.081154781429788e-10 -78.17796358934618,43.10654751308211,0 -78.17794421216659,43.10536387563141,-7.081154781429788e-10 
+						</coordinates>
+					</LinearRing>
+				</outerBoundaryIs>
+			</Polygon>
+		</Placemark>
+			<Placemark>
+			<name>CiderArray11</name>
+			<snippet></snippet>
+				<description>195.6 ac. Launch from Array 11 TOL. Flight 11, #14 in capture order.</description>
+			<styleUrl>#inline98</styleUrl>
+			<Polygon>
+				<tessellate>1</tessellate>
+				<altitudeMode>relativeToGround</altitudeMode>
+				<outerBoundaryIs>
+					<LinearRing>
+						<altitudeMode>relativeToGround</altitudeMode>
+						<coordinates>
+							-78.28006457984124,43.0880578291493,0 -78.27365525907827,43.08805179514146,-1.416230956285958e-09 -78.2735807692237,43.08870425053151,0 -78.27167770797205,43.08910874067608,-1.416230956285958e-09 -78.27142091508367,43.08931875101448,-7.081154781429788e-10 -78.26918493592694,43.08933909767945,-7.081154781429788e-10 -78.26904665809008,43.08865331112328,0 -78.26824922705147,43.08793229840231,-7.081154781429788e-10 -78.26508161030603,43.08792483031362,0 -78.26490818323725,43.0909437909401,-7.081154781429788e-10 -78.26487220211449,43.09613060154848,-7.081154781429788e-10 -78.2667239246026,43.09612548865707,-7.081154781429788e-10 -78.2702715031775,43.09507491009654,0 -78.27029098961351,43.09438139799145,0 -78.27584804044928,43.0943927403241,-7.081154781429788e-10 -78.27586069151653,43.09207495836188,0 -78.2787100810143,43.0918129208991,-7.081154781429788e-10 -78.28001529878493,43.0907737895358,-1.416230956285958e-09 -78.28013708342397,43.09027734065975,0 -78.28006457984124,43.0880578291493,0 
+						</coordinates>
+					</LinearRing>
+				</outerBoundaryIs>
+			</Polygon>
+		</Placemark>
+			<Placemark>
+			<name>CiderArray12</name>
+			<snippet></snippet>
+				<description>79.6 ac. Launch from Array 12 TOL. Flight 12, #12 in capture order.</description>
+			<styleUrl>#inline98</styleUrl>
+			<Polygon>
+				<tessellate>1</tessellate>
+				<altitudeMode>relativeToGround</altitudeMode>
+				<outerBoundaryIs>
+					<LinearRing>
+						<altitudeMode>relativeToGround</altitudeMode>
+						<coordinates>
+							-78.27379834839978,43.10188767876294,0 -78.27377567949114,43.09882585015091,0 -78.2721818727909,43.09881897001259,0 -78.27210679071727,43.09703342861222,-7.081154781429788e-10 -78.26876886056144,43.09696432362848,-1.416230956285958e-09 -78.26876901631786,43.0977875567889,0 -78.2668807792932,43.09777724588118,0 -78.26688706834467,43.09897718831652,0 -78.2645115467293,43.09958413375681,0 -78.26447901577748,43.10191366866572,0 -78.27379834839978,43.10188767876294,0 
+						</coordinates>
+					</LinearRing>
+				</outerBoundaryIs>
+			</Polygon>
+		</Placemark>
+			<Placemark>
+			<name>CiderArray13</name>
+			<snippet></snippet>
+				<description>61.3 ac. Launch from Array 14 TOL. Flight 14+13, #16 in capture order.</description>
+			<styleUrl>#inline98</styleUrl>
+			<Polygon>
+				<tessellate>1</tessellate>
+				<altitudeMode>relativeToGround</altitudeMode>
+				<outerBoundaryIs>
+					<LinearRing>
+						<altitudeMode>relativeToGround</altitudeMode>
+						<coordinates>
+							-78.26109177210657,43.10206436783407,-7.081154781429788e-10 -78.25871934358244,43.1021936924536,-7.081154781429788e-10 -78.25299897726926,43.10196921647159,-1.416230956285958e-09 -78.25100706199184,43.0998384836457,0 -78.25101053924432,43.0996301540463,-7.081154781429788e-10 -78.25141067680178,43.09895382200974,0 -78.25312695233855,43.09825918725146,-7.081154781429788e-10 -78.25701920455613,43.0982676894689,0 -78.25709673582601,43.10022786283948,0 -78.26105423907953,43.10016878997502,0 -78.26109177210657,43.10206436783407,-7.081154781429788e-10 
+						</coordinates>
+					</LinearRing>
+				</outerBoundaryIs>
+			</Polygon>
+		</Placemark>
+			<Placemark>
+			<name>CiderArray14</name>
+			<snippet></snippet>
+				<description>35.4 ac. Launch from Array 14 TOL. Flight 14+13, #16 in capture order.</description>
+			<styleUrl>#inline98</styleUrl>
+			<Polygon>
+				<tessellate>1</tessellate>
+				<altitudeMode>relativeToGround</altitudeMode>
+				<outerBoundaryIs>
+					<LinearRing>
+						<altitudeMode>relativeToGround</altitudeMode>
+						<coordinates>
+							-78.25693720833705,43.09634390732197,-7.081154781429788e-10 -78.25695189788135,43.09445357765994,0 -78.25678726001847,43.09350715263697,-7.081154781429788e-10 -78.25641281269152,43.09313059456959,0 -78.25529068972185,43.09277117982228,-7.081154781429788e-10 -78.25353545865579,43.09277295808725,-7.081154781429788e-10 -78.25234896771433,43.09423311701058,-7.081154781429788e-10 -78.25189208047195,43.09520877807147,-7.081154781429788e-10 -78.25194379075684,43.09708002868948,-7.081154781429788e-10 -78.25246632696773,43.09709210606256,1.416230956285958e-09 -78.25326015117216,43.09673003477148,0 -78.25456375254839,43.09576982597178,-7.081154781429788e-10 -78.25536111534547,43.0957682122477,0 -78.25580633220879,43.09634384813826,0 -78.25693720833705,43.09634390732197,-7.081154781429788e-10 
+						</coordinates>
+					</LinearRing>
+				</outerBoundaryIs>
+			</Polygon>
+		</Placemark>
+			<Placemark>
+			<name>CiderArray15W</name>
+			<snippet></snippet>
+				<description>6.9 ac. Launch from Array 15E TOL. Flight 15W+15E, #10 in capture order.</description>
+			<styleUrl>#inline98</styleUrl>
+			<Polygon>
+				<tessellate>1</tessellate>
+				<altitudeMode>relativeToGround</altitudeMode>
+				<outerBoundaryIs>
+					<LinearRing>
+						<altitudeMode>relativeToGround</altitudeMode>
+						<coordinates>
+							-78.25684940896643,43.08879970551536,0 -78.25505635394811,43.0888041685393,-1.416230956285958e-09 -78.25468280659248,43.0899151435824,-7.081154781429788e-10 -78.25465841293206,43.09034135652993,-7.081154781429788e-10 -78.25683585731828,43.09032287988244,0 -78.25684940896643,43.08879970551536,0 
+						</coordinates>
+					</LinearRing>
+				</outerBoundaryIs>
+			</Polygon>
+		</Placemark>
+			<Placemark>
+			<name>CiderArray15E</name>
+			<snippet></snippet>
+				<description>32.4 ac. Launch from Array 15E TOL. Flight 15W+15E, #10 in capture order.</description>
+			<styleUrl>#inline98</styleUrl>
+			<Polygon>
+				<tessellate>1</tessellate>
+				<altitudeMode>relativeToGround</altitudeMode>
+				<outerBoundaryIs>
+					<LinearRing>
+						<altitudeMode>relativeToGround</altitudeMode>
+						<coordinates>
+							-78.25160053761826,43.09110856110789,1.416230956285958e-09 -78.2518253940318,43.09006732876043,0 -78.25274758060019,43.09006885617281,-7.081154781429788e-10 -78.25283594248103,43.08926270705515,0 -78.25326789485304,43.0890026888468,0 -78.25350764469083,43.08854970437273,-1.416230956285958e-09 -78.25363737153761,43.08797036484238,-1.416230956285958e-09 -78.25342189607245,43.08739331539431,-1.416230956285958e-09 -78.24925312576319,43.08737349228549,-7.081154781429788e-10 -78.24734252842249,43.08866054257226,0 -78.24733104595349,43.08952452573187,-7.081154781429788e-10 -78.25032542410655,43.08953881150886,-7.081154781429788e-10 -78.25031954243525,43.09109980370726,-2.124346434428936e-09 -78.25160053761826,43.09110856110789,1.416230956285958e-09 
+						</coordinates>
+					</LinearRing>
+				</outerBoundaryIs>
+			</Polygon>
+		</Placemark>
+			<Placemark>
+			<name>CiderArray16</name>
+			<snippet></snippet>
+				<description>136.7 ac. Launch from Array 16 TOL. Flight 16, #9 in capture order.</description>
+			<styleUrl>#inline98</styleUrl>
+			<Polygon>
+				<tessellate>1</tessellate>
+				<altitudeMode>relativeToGround</altitudeMode>
+				<outerBoundaryIs>
+					<LinearRing>
+						<altitudeMode>relativeToGround</altitudeMode>
+						<coordinates>
+							-78.24706675749877,43.09709547583517,0 -78.24702056969495,43.09345798634727,0 -78.24548567470856,43.09343102178667,-7.081154781429788e-10 -78.24528249868573,43.09210304323101,-7.081154781429788e-10 -78.24426985495528,43.09208219329178,-7.081154781429788e-10 -78.24274506376162,43.09278820735237,0 -78.24228949561423,43.09318637533626,0 -78.23890846720209,43.09319426399451,0 -78.23824711848074,43.09333650299328,0 -78.23654743643739,43.09334053312185,0 -78.23649862359815,43.09421470890019,-7.081154781429788e-10 -78.23402761691021,43.0953366294856,0 -78.23050450969167,43.09713917354001,-7.081154781429788e-10 -78.2304936253618,43.0980270251559,0 -78.23453629691858,43.09805470726183,0 -78.23661555343527,43.09773794900104,0 -78.24310805050892,43.09771635091395,0 -78.24310843888424,43.09704960266217,0 -78.24706675749877,43.09709547583517,0 
+						</coordinates>
+					</LinearRing>
+				</outerBoundaryIs>
+			</Polygon>
+		</Placemark>
+			<Placemark>
+			<name>CiderArray17</name>
+			<snippet></snippet>
+				<description>94.8 ac. Launch from Array 17 TOL. Flight 17, #8 in capture order.</description>
+			<styleUrl>#inline98</styleUrl>
+			<Polygon>
+				<tessellate>1</tessellate>
+				<altitudeMode>relativeToGround</altitudeMode>
+				<outerBoundaryIs>
+					<LinearRing>
+						<altitudeMode>relativeToGround</altitudeMode>
+						<coordinates>
+							-78.22352169035203,43.10279296315473,1.416230956285958e-09 -78.23820933089388,43.10270073827906,-1.416230956285958e-09 -78.23823067321,43.10075853945612,-7.081154781429788e-10 -78.23626065455731,43.10074585769235,0 -78.23625118070919,43.09886978551534,0 -78.2343641121271,43.09886219829247,0 -78.23433251539632,43.0999237240963,-2.124346434428936e-09 -78.22992810334689,43.09992909253283,-7.081154781429788e-10 -78.22772090644946,43.09965269567351,-7.081154781429788e-10 -78.22493923864151,43.09964632178704,0 -78.22405807341342,43.10044399360068,0 -78.22374498488703,43.10078793569985,0 -78.22347082199562,43.1015794727406,0 -78.22352169035203,43.10279296315473,1.416230956285958e-09 
+						</coordinates>
+					</LinearRing>
+				</outerBoundaryIs>
+			</Polygon>
+		</Placemark>
+			<Placemark>
+			<name>CiderArray18</name>
+			<snippet></snippet>
+				<description>295.0 ac. Launch from Array 18 TOL. Flight 18, #3 in capture order.</description>
+			<styleUrl>#inline98</styleUrl>
+			<Polygon>
+				<tessellate>1</tessellate>
+				<altitudeMode>relativeToGround</altitudeMode>
+				<outerBoundaryIs>
+					<LinearRing>
+						<altitudeMode>relativeToGround</altitudeMode>
+						<coordinates>
+							-78.24218925629003,43.0922805942346,-7.081154781429788e-10 -78.24222387705655,43.09124800371251,-7.081154781429788e-10 -78.24199196938166,43.09038437126649,-1.416230956285958e-09 -78.24049122326666,43.08889901220447,-7.081154781429788e-10 -78.23890446236278,43.08778301522538,-7.081154781429788e-10 -78.23425306195325,43.08777124209435,0 -78.22251708698781,43.08770473580661,-1.416230956285958e-09 -78.2199462436452,43.08806999556796,-2.124346434428936e-09 -78.21898878844138,43.08873529319029,-7.081154781429788e-10 -78.21729149137568,43.08878641409209,-7.081154781429788e-10 -78.21740585808433,43.09184452592539,0 -78.22199195115421,43.09192357616432,0 -78.22232352175048,43.09407149500274,-7.081154781429788e-10 -78.22821902432922,43.09405948137834,0 -78.22860752469367,43.09556906503006,0 -78.23167215310326,43.09557183840342,-7.081154781429788e-10 -78.23241955036673,43.09409577032989,-7.081154781429788e-10 -78.23544823176545,43.09327515128485,0 -78.23601399037807,43.09226258436856,-7.081154781429788e-10 -78.24218925629003,43.0922805942346,-7.081154781429788e-10 
+						</coordinates>
+					</LinearRing>
+				</outerBoundaryIs>
+			</Polygon>
+		</Placemark>
+			<Placemark>
+			<name>CiderArray19</name>
+			<snippet></snippet>
+				<description>27.1 ac. Launch from Substation TOL. Flight 19+SS, #18 in capture order.</description>
+			<styleUrl>#inline98</styleUrl>
+			<Polygon>
+				<tessellate>1</tessellate>
+				<altitudeMode>relativeToGround</altitudeMode>
+				<outerBoundaryIs>
+					<LinearRing>
+						<altitudeMode>relativeToGround</altitudeMode>
+						<coordinates>
+							-78.22024563118225,43.10291481188975,-1.416230956285958e-09 -78.22017149395386,43.10003571405812,-7.081154781429788e-10 -78.21829938166826,43.10002414502281,-7.081154781429788e-10 -78.21770496678617,43.10037999512707,1.416230956285958e-09 -78.2176947665271,43.1012061148798,0 -78.21495531868604,43.10121272962883,0 -78.21457550509953,43.10208535268732,-7.081154781429788e-10 -78.21453137885392,43.10285295271292,0 -78.22024563118225,43.10291481188975,-1.416230956285958e-09 
+						</coordinates>
+					</LinearRing>
+				</outerBoundaryIs>
+			</Polygon>
+		</Placemark>
+			<Placemark>
+			<name>CiderArray20</name>
+			<snippet></snippet>
+				<description>18.1 ac. Launch from Array 21 TOL. Flight 21+20, #19 in capture order.</description>
+			<styleUrl>#inline98</styleUrl>
+			<Polygon>
+				<tessellate>1</tessellate>
+				<altitudeMode>relativeToGround</altitudeMode>
+				<outerBoundaryIs>
+					<LinearRing>
+						<altitudeMode>relativeToGround</altitudeMode>
+						<coordinates>
+							-78.21196860003047,43.09933602984422,-7.081154781429788e-10 -78.20996005701453,43.09935108432587,0 -78.20991452607547,43.10307299568162,0 -78.2121140646703,43.10308603695093,0 -78.21215335039888,43.10098554723379,0 -78.21196860003047,43.09933602984422,-7.081154781429788e-10 
+						</coordinates>
+					</LinearRing>
+				</outerBoundaryIs>
+			</Polygon>
+		</Placemark>
+			<Placemark>
+			<name>CiderArray21</name>
+			<snippet></snippet>
+				<description>31.2 ac. Launch from Array 21 TOL. Flight 21+20, #19 in capture order.</description>
+			<styleUrl>#inline98</styleUrl>
+			<Polygon>
+				<tessellate>1</tessellate>
+				<altitudeMode>relativeToGround</altitudeMode>
+				<outerBoundaryIs>
+					<LinearRing>
+						<altitudeMode>relativeToGround</altitudeMode>
+						<coordinates>
+							-78.2073626620284,43.10315515429591,0 -78.2037274437332,43.1031410282359,0 -78.20359329391654,43.10191755485807,-1.416230956285958e-09 -78.2036063635978,43.09939924706317,0 -78.20736538718539,43.09944332753309,0 -78.2073626620284,43.10315515429591,0 
+						</coordinates>
+					</LinearRing>
+				</outerBoundaryIs>
+			</Polygon>
+		</Placemark>
+			<Placemark>
+			<name>CiderArray22</name>
+			<snippet></snippet>
+				<description>27.0 ac. Launch from Array 22 TOL. Flight 22, #6 in capture order.</description>
+			<styleUrl>#inline98</styleUrl>
+			<Polygon>
+				<tessellate>1</tessellate>
+				<altitudeMode>relativeToGround</altitudeMode>
+				<outerBoundaryIs>
+					<LinearRing>
+						<altitudeMode>relativeToGround</altitudeMode>
+						<coordinates>
+							-78.217844065316,43.09790472553586,0 -78.21760441959682,43.09643868180468,-7.081154781429788e-10 -78.21761218641331,43.09516465335335,0 -78.21849380561694,43.09410843347914,-7.081154781429788e-10 -78.22078449244157,43.09354034815478,-1.416230956285958e-09 -78.22164604615163,43.09355104448655,-7.081154781429788e-10 -78.22217523432546,43.09393327694745,-7.081154781429788e-10 -78.22217361185278,43.0944711273092,0 -78.21939203414219,43.09726860272423,-7.081154781429788e-10 -78.21852613736741,43.09790743004498,0 -78.217844065316,43.09790472553586,0 
+						</coordinates>
+					</LinearRing>
+				</outerBoundaryIs>
+			</Polygon>
+		</Placemark>
+			<Placemark>
+			<name>CiderArray23</name>
+			<snippet></snippet>
+				<description>322.5 ac. Launch from Array 23 TOL. Flight 23, #1 in capture order.</description>
+			<styleUrl>#inline98</styleUrl>
+			<Polygon>
+				<tessellate>1</tessellate>
+				<altitudeMode>relativeToGround</altitudeMode>
+				<outerBoundaryIs>
+					<LinearRing>
+						<altitudeMode>relativeToGround</altitudeMode>
+						<coordinates>
+							-78.21680986582896,43.09452059036965,-7.081154781429788e-10 -78.21623043986108,43.08597937206603,1.416230956285958e-09 -78.21216079153133,43.0857617164294,-1.416230956285958e-09 -78.20394553166302,43.08863819007207,0 -78.2010642433369,43.09129814867545,0 -78.20135933304549,43.09650087709895,-7.081154781429788e-10 -78.20372223074116,43.09699304477492,-7.081154781429788e-10 -78.2037250914988,43.09819838878516,0 -78.20593956484639,43.09820731201712,0 -78.21680986582896,43.09452059036965,-7.081154781429788e-10 
+						</coordinates>
+					</LinearRing>
+				</outerBoundaryIs>
+			</Polygon>
+		</Placemark>
+			<Placemark>
+			<name>CiderArray24</name>
+			<snippet></snippet>
+				<description>19.7 ac. Launch from Array 25W TOL. Flight 24+25E+25W, #5 in capture order.</description>
+			<styleUrl>#inline98</styleUrl>
+			<Polygon>
+				<tessellate>1</tessellate>
+				<altitudeMode>relativeToGround</altitudeMode>
+				<outerBoundaryIs>
+					<LinearRing>
+						<altitudeMode>relativeToGround</altitudeMode>
+						<coordinates>
+							-78.21371666441827,43.08333376780995,0 -78.21006507201297,43.0831304212219,0 -78.20854991049178,43.08313832574005,0 -78.2085540717525,43.08475098039027,-7.081154781429788e-10 -78.21203014271299,43.08496661931628,0 -78.21379602392942,43.08497081940429,-1.416230956285958e-09 -78.21371666441827,43.08333376780995,0 
+						</coordinates>
+					</LinearRing>
+				</outerBoundaryIs>
+			</Polygon>
+		</Placemark>
+			<Placemark>
+			<name>CiderArray25W</name>
+			<snippet></snippet>
+				<description>34.0 ac. Launch from Array 25W TOL. Flight 24+25E+25W, #5 in capture order.</description>
+			<styleUrl>#inline98</styleUrl>
+			<Polygon>
+				<tessellate>1</tessellate>
+				<altitudeMode>relativeToGround</altitudeMode>
+				<outerBoundaryIs>
+					<LinearRing>
+						<altitudeMode>relativeToGround</altitudeMode>
+						<coordinates>
+							-78.21686796817632,43.07774796417772,0 -78.21670072556692,43.07964672081724,-7.081154781429788e-10 -78.21692158439058,43.08250275872157,0 -78.2186497698395,43.08250293203185,0 -78.22103013376039,43.07845661094233,-1.416230956285958e-09 -78.22101152681661,43.07777866668835,0 -78.21686796817632,43.07774796417772,0 
+						</coordinates>
+					</LinearRing>
+				</outerBoundaryIs>
+			</Polygon>
+		</Placemark>
+			<Placemark>
+			<name>CiderArray25E</name>
+			<snippet></snippet>
+				<description>67.3 ac. Launch from Array 25W TOL. Flight 24+25E+25W, #5 in capture order.</description>
+			<styleUrl>#inline98</styleUrl>
+			<Polygon>
+				<tessellate>1</tessellate>
+				<altitudeMode>relativeToGround</altitudeMode>
+				<outerBoundaryIs>
+					<LinearRing>
+						<altitudeMode>relativeToGround</altitudeMode>
+						<coordinates>
+							-78.21610667408143,43.08250436086745,-7.081154781429788e-10 -78.21596534216405,43.07725864238031,0 -78.21178381626075,43.07725339750436,-7.081154781429788e-10 -78.2117703687548,43.07892188032153,-1.416230956285958e-09 -78.21031422916913,43.07919141006295,0 -78.20843159830578,43.0797548833923,1.416230956285958e-09 -78.20843358090322,43.08171859997786,0 -78.21610667408143,43.08250436086745,-7.081154781429788e-10 
+						</coordinates>
+					</LinearRing>
+				</outerBoundaryIs>
+			</Polygon>
+		</Placemark>
+			<Placemark>
+			<name>CiderArray26</name>
+			<snippet></snippet>
+				<description>51.1 ac. Launch from Base. Flight Off+26+27, #26 in capture order.</description>
+			<styleUrl>#inline98</styleUrl>
+			<Polygon>
+				<tessellate>1</tessellate>
+				<altitudeMode>relativeToGround</altitudeMode>
+				<outerBoundaryIs>
+					<LinearRing>
+						<altitudeMode>relativeToGround</altitudeMode>
+						<coordinates>
+							-78.19899613221692,43.09037170182208,-7.081154781429788e-10 -78.19737267007515,43.09036055056264,0 -78.19738342800544,43.09550928901158,0 -78.19549325531968,43.09556934484677,0 -78.19162914615481,43.09583003283437,0 -78.19241471703218,43.09781480903618,-7.081154781429788e-10 -78.19408230099215,43.09785550733077,0 -78.19955487398778,43.09654272919339,0 -78.19899613221692,43.09037170182208,-7.081154781429788e-10 
+						</coordinates>
+					</LinearRing>
+				</outerBoundaryIs>
+			</Polygon>
+		</Placemark>
+			<Placemark>
+			<name>CiderArray27</name>
+			<snippet></snippet>
+				<description>36.3 ac. Launch from Base. Flight Off+26+27, #26 in capture order.</description>
+			<styleUrl>#inline98</styleUrl>
+			<Polygon>
+				<tessellate>1</tessellate>
+				<altitudeMode>relativeToGround</altitudeMode>
+				<outerBoundaryIs>
+					<LinearRing>
+						<altitudeMode>relativeToGround</altitudeMode>
+						<coordinates>
+							-78.18587061665619,43.0959315315348,-7.081154781429788e-10 -78.19075138718929,43.09594051403295,-1.416230956285958e-09 -78.19131325473035,43.09716562822389,0 -78.19131816893746,43.09863344953892,0 -78.19008986398407,43.09898283839294,0 -78.1877850294297,43.09933959417577,-7.081154781429788e-10 -78.18669409617222,43.09933952412575,-7.081154781429788e-10 -78.18589825491514,43.09729738090002,0 -78.18587061665619,43.0959315315348,-7.081154781429788e-10 
+						</coordinates>
+					</LinearRing>
+				</outerBoundaryIs>
+			</Polygon>
+		</Placemark>
+			<Placemark>
+			<name>CiderArray28</name>
+			<snippet></snippet>
+				<description>240.4 ac. Launch from Array 28 TOL. Flight 28, #20 in capture order.</description>
+			<styleUrl>#inline98</styleUrl>
+			<Polygon>
+				<tessellate>1</tessellate>
+				<altitudeMode>relativeToGround</altitudeMode>
+				<outerBoundaryIs>
+					<LinearRing>
+						<altitudeMode>relativeToGround</altitudeMode>
+						<coordinates>
+							-78.1661575751329,43.09932278764229,-7.081154781429788e-10 -78.18392517084304,43.09925288719636,-7.081154781429788e-10 -78.18414902264969,43.09658701658439,0 -78.18284131846191,43.09620916476856,-7.081154781429788e-10 -78.18203995992441,43.08890966976306,0 -78.1758622558667,43.08887976312574,-1.416230956285958e-09 -78.17555686530817,43.09523507363842,0 -78.16613322510987,43.09649573565233,0 -78.1661575751329,43.09932278764229,-7.081154781429788e-10 
+						</coordinates>
+					</LinearRing>
+				</outerBoundaryIs>
+			</Polygon>
+		</Placemark>
+			<Placemark>
+			<name>CiderArray29</name>
+			<snippet></snippet>
+				<description>96.1 ac. Launch from Array 29 TOL. Flight 29, #23 in capture order.</description>
+			<styleUrl>#inline98</styleUrl>
+			<Polygon>
+				<tessellate>1</tessellate>
+				<altitudeMode>relativeToGround</altitudeMode>
+				<outerBoundaryIs>
+					<LinearRing>
+						<altitudeMode>relativeToGround</altitudeMode>
+						<coordinates>
+							-78.16990255483414,43.10286598906953,0 -78.16235925775544,43.10402409285573,0 -78.15687910592308,43.10392440751793,0 -78.1570305669492,43.10056029759865,-7.081154781429788e-10 -78.16096507282782,43.10015608436017,-7.081154781429788e-10 -78.16818089071417,43.10016306317681,-1.416230956285958e-09 -78.16991116872941,43.1020272271187,0 -78.16990255483414,43.10286598906953,0 
+						</coordinates>
+					</LinearRing>
+				</outerBoundaryIs>
+			</Polygon>
+		</Placemark>
+			<Placemark>
+			<name>CiderArray30</name>
+			<snippet></snippet>
+				<description>126.4 ac. Launch from Array 30 TOL. Flight 30, #22 in capture order.</description>
+			<styleUrl>#inline98</styleUrl>
+			<Polygon>
+				<tessellate>1</tessellate>
+				<altitudeMode>relativeToGround</altitudeMode>
+				<outerBoundaryIs>
+					<LinearRing>
+						<altitudeMode>relativeToGround</altitudeMode>
+						<coordinates>
+							-78.16066950086203,43.09528429753678,-1.416230956285958e-09 -78.16752084244906,43.09481420422679,-7.081154781429788e-10 -78.17482382735028,43.09443184180942,0 -78.17462493867325,43.09233063524058,-7.081154781429788e-10 -78.16263292824105,43.09237567236306,0 -78.16258754665597,43.09020843375048,0 -78.16014965573017,43.09021701700978,0 -78.16010399963399,43.09125604757593,0 -78.15649173973043,43.09128447255438,-7.081154781429788e-10 -78.15639823970933,43.09527630486272,-1.416230956285958e-09 -78.16066950086203,43.09528429753678,-1.416230956285958e-09 
+						</coordinates>
+					</LinearRing>
+				</outerBoundaryIs>
+			</Polygon>
+		</Placemark>
+		</Folder>
+		<Folder>
+			<name>TOLs</name>
+			<Placemark id="tol-base">
+				<name>Base</name>
+				<description>Launch for: Offices, Array 26, Array 27</description>
+				<styleUrl>#baseStyle</styleUrl>
+				<Point><coordinates>-78.1922174378,43.0972242460,0</coordinates></Point>
+			</Placemark>
+			<Placemark id="tol-array-18-tol">
+				<name>Array 18 TOL</name>
+				<description>Launch for: Array 18</description>
+				<styleUrl>#tolStyle</styleUrl>
+				<Point><coordinates>-78.2296779556,43.0900452401,0</coordinates></Point>
+			</Placemark>
+			<Placemark id="tol-array-21-tol">
+				<name>Array 21 TOL</name>
+				<description>Launch for: Array 20, Array 21</description>
+				<styleUrl>#tolStyle</styleUrl>
+				<Point><coordinates>-78.2055385277,43.1012105896,0</coordinates></Point>
+			</Placemark>
+			<Placemark id="tol-array-23-tol">
+				<name>Array 23 TOL</name>
+				<description>Launch for: Array 23</description>
+				<styleUrl>#tolStyle</styleUrl>
+				<Point><coordinates>-78.2128950525,43.0922126052,0</coordinates></Point>
+			</Placemark>
+			<Placemark id="tol-array-25w-tol">
+				<name>Array 25W TOL</name>
+				<description>Launch for: Array 24, Array 25W, Array 25E</description>
+				<styleUrl>#tolStyle</styleUrl>
+				<Point><coordinates>-78.2166541742,43.0821840310,0</coordinates></Point>
+			</Placemark>
+			<Placemark id="tol-array-22-tol">
+				<name>Array 22 TOL</name>
+				<description>Launch for: Array 22</description>
+				<styleUrl>#tolStyle</styleUrl>
+				<Point><coordinates>-78.2179364500,43.0966672142,0</coordinates></Point>
+			</Placemark>
+			<Placemark id="tol-array-04-tol">
+				<name>Array 04 TOL</name>
+				<description>Launch for: Array 03, Array 04, Array 05</description>
+				<styleUrl>#tolStyle</styleUrl>
+				<Point><coordinates>-78.2323103157,43.1050547310,0</coordinates></Point>
+			</Placemark>
+			<Placemark id="tol-array-16-tol">
+				<name>Array 16 TOL</name>
+				<description>Launch for: Array 16</description>
+				<styleUrl>#tolStyle</styleUrl>
+				<Point><coordinates>-78.2408959011,43.0954198788,0</coordinates></Point>
+			</Placemark>
+			<Placemark id="tol-array-15e-tol">
+				<name>Array 15E TOL</name>
+				<description>Launch for: Array 15W, Array 15E</description>
+				<styleUrl>#tolStyle</styleUrl>
+				<Point><coordinates>-78.2471865940,43.0893941331,0</coordinates></Point>
+			</Placemark>
+			<Placemark id="tol-array-14-tol">
+				<name>Array 14 TOL</name>
+				<description>Launch for: Array 13, Array 14</description>
+				<styleUrl>#tolStyle</styleUrl>
+				<Point><coordinates>-78.2564783556,43.0960697298,0</coordinates></Point>
+			</Placemark>
+			<Placemark id="tol-array-11-tol">
+				<name>Array 11 TOL</name>
+				<description>Launch for: Array 11</description>
+				<styleUrl>#tolStyle</styleUrl>
+				<Point><coordinates>-78.2714260824,43.0912836201,0</coordinates></Point>
+			</Placemark>
+			<Placemark id="tol-array-12-tol">
+				<name>Array 12 TOL</name>
+				<description>Launch for: Array 12</description>
+				<styleUrl>#tolStyle</styleUrl>
+				<Point><coordinates>-78.2691503421,43.1018006655,0</coordinates></Point>
+			</Placemark>
+			<Placemark id="tol-array-17-tol">
+				<name>Array 17 TOL</name>
+				<description>Launch for: Array 17</description>
+				<styleUrl>#tolStyle</styleUrl>
+				<Point><coordinates>-78.2322745389,43.1015481154,0</coordinates></Point>
+			</Placemark>
+			<Placemark id="tol-array-01-tol">
+				<name>Array 01 TOL</name>
+				<description>Launch for: Array 01</description>
+				<styleUrl>#tolStyle</styleUrl>
+				<Point><coordinates>-78.2627079734,43.1058494039,0</coordinates></Point>
+			</Placemark>
+			<Placemark id="tol-array-06-tol">
+				<name>Array 06 TOL</name>
+				<description>Launch for: Array 06</description>
+				<styleUrl>#tolStyle</styleUrl>
+				<Point><coordinates>-78.2122154183,43.1077124871,0</coordinates></Point>
+			</Placemark>
+			<Placemark id="tol-substation-tol">
+				<name>Substation TOL</name>
+				<description>Launch for: Substation, Array 19</description>
+				<styleUrl>#tolStyle</styleUrl>
+				<Point><coordinates>-78.2130059067,43.1044455202,0</coordinates></Point>
+			</Placemark>
+			<Placemark id="tol-array-28-tol">
+				<name>Array 28 TOL</name>
+				<description>Launch for: Array 28</description>
+				<styleUrl>#tolStyle</styleUrl>
+				<Point><coordinates>-78.1763971118,43.0969656328,0</coordinates></Point>
+			</Placemark>
+			<Placemark id="tol-array-30-tol">
+				<name>Array 30 TOL</name>
+				<description>Launch for: Array 30</description>
+				<styleUrl>#tolStyle</styleUrl>
+				<Point><coordinates>-78.1670191633,43.0935225748,0</coordinates></Point>
+			</Placemark>
+			<Placemark id="tol-array-29-tol">
+				<name>Array 29 TOL</name>
+				<description>Launch for: Array 29</description>
+				<styleUrl>#tolStyle</styleUrl>
+				<Point><coordinates>-78.1655644351,43.1003587226,0</coordinates></Point>
+			</Placemark>
+			<Placemark id="tol-array-02e-tol">
+				<name>Array 02E TOL</name>
+				<description>Launch for: Array 02W, Array 02E</description>
+				<styleUrl>#tolStyle</styleUrl>
+				<Point><coordinates>-78.2465738784,43.1076543994,0</coordinates></Point>
+			</Placemark>
+			<Placemark id="tol-west-laydown-tol">
+				<name>West Laydown TOL</name>
+				<description>Launch for: West Laydown</description>
+				<styleUrl>#tolStyle</styleUrl>
+				<Point><coordinates>-78.2765809585,43.0956735770,0</coordinates></Point>
+			</Placemark>
+			<Placemark id="tol-array-08-tol">
+				<name>Array 08 TOL</name>
+				<description>Launch for: Array 07, Array 08</description>
+				<styleUrl>#tolStyle</styleUrl>
+				<Point><coordinates>-78.1924898048,43.1121507776,0</coordinates></Point>
+			</Placemark>
+			<Placemark id="tol-array-10-tol">
+				<name>Array 10 TOL</name>
+				<description>Launch for: Array 09, Array 10</description>
+				<styleUrl>#tolStyle</styleUrl>
+				<Point><coordinates>-78.1760073052,43.1085990502,0</coordinates></Point>
+			</Placemark>
+		</Folder>
+		<Folder>
+			<name>Daisy chains</name>
+			<Placemark>
+				<name>3+5+4</name>
+				<description>Array 04 TOL to Array 03 to Array 05 to Array 04</description>
+				<styleUrl>#chainStyle</styleUrl>
+				<LineString><tessellate>1</tessellate><coordinates>-78.23231032,43.10505473,0 -78.23082601,43.11092449,0 -78.22571276,43.10731014,0 -78.23287983,43.10517120,0</coordinates></LineString>
+			</Placemark>
+			<Placemark>
+				<name>24+25E+25W</name>
+				<description>Array 25W TOL to Array 24 to Array 25E to Array 25W</description>
+				<styleUrl>#chainStyle</styleUrl>
+				<LineString><tessellate>1</tessellate><coordinates>-78.21665417,43.08218403,0 -78.21115892,43.08405201,0 -78.21286680,43.08001447,0 -78.21849226,43.07979927,0</coordinates></LineString>
+			</Placemark>
+			<Placemark>
+				<name>15W+15E</name>
+				<description>Array 15E TOL to Array 15W to Array 15E</description>
+				<styleUrl>#chainStyle</styleUrl>
+				<LineString><tessellate>1</tessellate><coordinates>-78.24718659,43.08939413,0 -78.25582435,43.08959434,0 -78.25072913,43.08882354,0</coordinates></LineString>
+			</Placemark>
+			<Placemark>
+				<name>2E+2W</name>
+				<description>Array 02E TOL to Array 02E to Array 02W</description>
+				<styleUrl>#chainStyle</styleUrl>
+				<LineString><tessellate>1</tessellate><coordinates>-78.24657388,43.10765440,0 -78.24458156,43.10752500,0 -78.25028757,43.10878287,0</coordinates></LineString>
+			</Placemark>
+			<Placemark>
+				<name>19+SS</name>
+				<description>Substation TOL to Array 19 to Substation</description>
+				<styleUrl>#chainStyle</styleUrl>
+				<LineString><tessellate>1</tessellate><coordinates>-78.21300591,43.10444552,0 -78.21781474,43.10172760,0 -78.21686529,43.10471696,0</coordinates></LineString>
+			</Placemark>
+			<Placemark>
+				<name>14+13</name>
+				<description>Array 14 TOL to Array 14 to Array 13</description>
+				<styleUrl>#chainStyle</styleUrl>
+				<LineString><tessellate>1</tessellate><coordinates>-78.25647836,43.09606973,0 -78.25443592,43.09477304,0 -78.25575321,43.10040653,0</coordinates></LineString>
+			</Placemark>
+			<Placemark>
+				<name>21+20</name>
+				<description>Array 21 TOL to Array 21 to Array 20</description>
+				<styleUrl>#chainStyle</styleUrl>
+				<LineString><tessellate>1</tessellate><coordinates>-78.20553853,43.10121059,0 -78.20548953,43.10127716,0 -78.21102240,43.10123733,0</coordinates></LineString>
+			</Placemark>
+			<Placemark>
+				<name>9+10</name>
+				<description>Array 10 TOL to Array 09 to Array 10</description>
+				<styleUrl>#chainStyle</styleUrl>
+				<LineString><tessellate>1</tessellate><coordinates>-78.17600731,43.10859905,0 -78.18486044,43.10635784,0 -78.17102762,43.10703735,0</coordinates></LineString>
+			</Placemark>
+			<Placemark>
+				<name>7+8</name>
+				<description>Array 08 TOL to Array 07 to Array 08</description>
+				<styleUrl>#chainStyle</styleUrl>
+				<LineString><tessellate>1</tessellate><coordinates>-78.19248980,43.11215078,0 -78.19569820,43.11233237,0 -78.18956031,43.11210945,0</coordinates></LineString>
+			</Placemark>
+			<Placemark>
+				<name>Off+26+27</name>
+				<description>Base to Offices to Array 26 to Array 27</description>
+				<styleUrl>#chainStyle</styleUrl>
+				<LineString><tessellate>1</tessellate><coordinates>-78.19221744,43.09722425,0 -78.19519911,43.09817370,0 -78.19659267,43.09506931,0 -78.18856606,43.09751582,0</coordinates></LineString>
+			</Placemark>
+		</Folder>
+	</Folder>
+</Document>
+</kml>
