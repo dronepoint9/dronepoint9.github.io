@@ -117,6 +117,7 @@ svg{width:100%;height:100%;display:block;user-select:none;-webkit-user-select:no
 #next .btns button.skip{color:#7a4a00;border-color:#e8b45c}
 .skips{margin-top:10px;padding-top:8px;border-top:1px solid #eee;font-size:13px;color:var(--muted)}
 .skips button{border:1px solid #e8b45c;background:#fff8ec;color:#7a4a00;border-radius:8px;padding:6px 10px;font:inherit;font-size:13px;font-weight:700;margin:4px 6px 0 0}
+#nback{display:block;width:100%;margin-top:10px;border:1px dashed var(--line);background:#fafaf8;color:var(--muted);border-radius:9px;padding:10px;font:inherit;font-size:13.5px;font-weight:600}
 footer{padding:6px 16px 28px;font-size:12px;color:var(--muted)}
 </style>
 </head>
@@ -291,6 +292,17 @@ const save=()=>{try{localStorage.setItem(KEY,JSON.stringify([...done]));localSto
 // battery pairs: same flight name flown from the same TOL back to back (23, 18, 28)
 const pairOf=k=>{const out=[k];for(let j=k-1;j>=0&&D.order[j].flight===D.order[k].flight;j--)out.unshift(j);for(let j=k+1;j<D.order.length&&D.order[j].flight===D.order[k].flight;j++)out.push(j);return out};
 const open_=j=>!done.has(j)&&!notflown.has(j);
+// access dependencies: the key flight is only reachable through the value flight's access
+const ACCESS={'3+5+4':'17','1':'12'};
+const idxOfFlight=f=>D.order.findIndex(o=>o.flight===f);
+const dependentsOf=k=>Object.keys(ACCESS).filter(d=>ACCESS[d]===D.order[k].flight).map(idxOfFlight).filter(j=>j>=0);
+const gateOf=k=>{const g=ACCESS[D.order[k].flight];return g?idxOfFlight(g):-1};
+// undo history (Back button): snapshot of the day state before each action
+let hist=ld('cider-hist-v1',[]);
+function snap(label){hist.push({label,s:JSON.stringify({d:[...done],sk:[...skipped],nf:[...notflown],last,plan,tags})});if(hist.length>40)hist.shift();try{localStorage.setItem('cider-hist-v1',JSON.stringify(hist))}catch(e){}}
+function undo(){const h=hist.pop();if(!h)return;const s=JSON.parse(h.s);done=new Set(s.d);skipped=new Set(s.sk);notflown=new Set(s.nf);last=s.last;plan=s.plan;tags=s.tags;
+  try{localStorage.setItem('cider-hist-v1',JSON.stringify(hist))}catch(e){}save();renderList();fitLeg()}
+const fl=k=>D.order[k].flight+(pairOf(k).length>1?` (battery ${pairOf(k).indexOf(k)+1})`:'');
 function pickNext(){
   let k=plan.find(j=>open_(j)&&!skipped.has(j));if(k!==undefined)return{k,mode:tags[k]||''};
   k=plan.find(j=>open_(j));if(k!==undefined)return{k,mode:'return'};
@@ -301,12 +313,16 @@ function dTol(a,b){if(a.id===b.id)return 0;const key=a.id+'>'+b.id;if(dCache.has
   const r=routeBetween(a,b),v=r?pathLen([[a.lon,a.lat],...r.pts,[b.lon,b.lat]]):hav([a.lon,a.lat],[b.lon,b.lat])*1.4;dCache.set(key,v);return v}
 const curTol=()=>(last!==null&&done.has(last))?tolOf(last):D.tols.find(x=>x.base);
 // put a reopened flight where it adds the least driving among the flights still to fly
-function reinsert(k){const pr=pairOf(k).filter(open_);if(!pr.length)return;pr.forEach(j=>skipped.delete(j));
-  plan=plan.filter(j=>!pr.includes(j));const rem=plan.filter(j=>open_(j)&&!skipped.has(j)),X=tolOf(pr[0]);
+function reinsert(k){
+  // the block to reopen: this flight's batteries plus any skipped flights that are only reachable through it
+  let grp=pairOf(k).filter(open_);dependentsOf(k).forEach(d=>{if(skipped.has(d))grp.push(...pairOf(d).filter(open_))});
+  grp=[...new Set(grp)].sort((x,y)=>x-y);if(!grp.length)return;grp.forEach(j=>skipped.delete(j));
+  plan=plan.filter(j=>!grp.includes(j));const rem=plan.filter(j=>open_(j)&&!skipped.has(j));
+  const F=tolOf(grp[0]),Lt=tolOf(grp[grp.length-1]);let inner=0;for(let i=1;i<grp.length;i++)inner+=dTol(tolOf(grp[i-1]),tolOf(grp[i]));
   let best=0,bc=Infinity;for(let i=0;i<=rem.length;i++){const a=i===0?curTol():tolOf(rem[i-1]),b=i<rem.length?tolOf(rem[i]):null;
-    const c=dTol(a,X)+(b?dTol(X,b)-dTol(a,b):0);if(c<bc-0.5){bc=c;best=i}}
-  const at=best<rem.length?plan.indexOf(rem[best]):plan.length;plan.splice(at,0,...pr);
-  pr.forEach(j=>tags[j]='reopened');save();renderList()}
+    const c=dTol(a,F)+inner+(b?dTol(Lt,b)-dTol(a,b):0);if(c<bc-0.5){bc=c;best=i}}
+  const at=best<rem.length?plan.indexOf(rem[best]):plan.length;plan.splice(at,0,...grp);
+  grp.forEach(j=>tags[j]='reopened');save();renderList()}
 // deliberately fly a flight next (checklist Next button)
 function moveUp(k){const pr=pairOf(k).filter(open_);if(!pr.length)return;pr.forEach(j=>skipped.delete(j));
   plan=plan.filter(j=>!pr.includes(j));const first=plan.findIndex(j=>open_(j));plan.splice(first<0?plan.length:first,0,...pr);
@@ -332,11 +348,11 @@ function renderNum(){const L=D.areas.map(a=>a.name).sort((a,b)=>numKey(a)-numKey
 function renderList(){document.querySelectorAll('#sortbar button').forEach(b=>b.classList.toggle('on',b.dataset.s===sortMode));if(sortMode==='num')return renderNum();items.innerHTML=plan.map(k=>{const o=D.order[k];const t=tolById[D.areas[idx[o.members[0]]].tol];
   return `<div class="item" data-k="${k}"><input type="checkbox" aria-label="Done"><div class="num">${k+1}</div><div class="body"><div class="fl">${o.flight}</div><div class="meta">${TN(t.id)} · ${acr(o).toFixed(0)} ac · ~${o.min} min${o.note?' · '+o.note:''}</div></div><button class="mk" data-mk="${k}">Next</button><a href="${dir(t.lat,t.lon)}" target="_blank" rel="noopener">Go</a></div>`}).join('');refresh()}
 items.addEventListener('click',e=>{const it=e.target.closest('.item');if(!it||e.target.closest('a'))return;const n=it.dataset.n,k=+it.dataset.k;
-  if(e.target.dataset.mk!==undefined){moveUp(+e.target.dataset.mk);show('map');mapwrap.scrollIntoView({behavior:'smooth'});return}
-  if(e.target.tagName==='INPUT'){const ks=n!==undefined?flightsOf(n):[k];ks.forEach(j=>markDone(j,e.target.checked));save();refresh();return}
+  if(e.target.dataset.mk!==undefined){snap('Next on '+D.order[+e.target.dataset.mk].flight);moveUp(+e.target.dataset.mk);show('map');mapwrap.scrollIntoView({behavior:'smooth'});return}
+  if(e.target.tagName==='INPUT'){snap((e.target.checked?'check on ':'uncheck on ')+(n!==undefined?n.replace('Array ',''):fl(k)));const ks=n!==undefined?flightsOf(n):[k];ks.forEach(j=>markDone(j,e.target.checked));save();refresh();return}
   show('map');selArea(n!==undefined?idx[n]:idx[D.order[k].members[0]],true);mapwrap.scrollIntoView({behavior:'smooth'})});
 sortbar.addEventListener('click',e=>{const b=e.target.closest('button');if(!b)return;sortMode=b.dataset.s;try{localStorage.setItem('cider-sort',sortMode)}catch(_){}renderList()});
-reset.onclick=()=>{if(reset.dataset.armed){done.clear();skipped.clear();notflown.clear();last=null;plan=D.order.map((o,j)=>j);tags={};save();refresh();reset.textContent='Reset';delete reset.dataset.armed}else{reset.dataset.armed=1;reset.textContent='Tap again to clear';setTimeout(()=>{reset.textContent='Reset';delete reset.dataset.armed},3000)}};
+reset.onclick=()=>{if(reset.dataset.armed){hist=[];try{localStorage.setItem('cider-hist-v1','[]')}catch(e){}done.clear();skipped.clear();notflown.clear();last=null;plan=D.order.map((o,j)=>j);tags={};save();refresh();reset.textContent='Reset';delete reset.dataset.armed}else{reset.dataset.armed=1;reset.textContent='Tap again to clear';setTimeout(()=>{reset.textContent='Reset';delete reset.dataset.armed},3000)}};
 function show(v){mapview.style.display=v==='map'?'block':'none';list.style.display=v==='list'?'block':'none';tMap.classList.toggle('on',v==='map');tList.classList.toggle('on',v==='list');if(v==='map')apply()}
 tMap.onclick=()=>show('map');tList.onclick=()=>show('list');
 
@@ -442,11 +458,13 @@ function routeBetween(a,b){
     g.G.get(u).forEach((w,v)=>{const nd=du+w;if(nd<(dist.has(v)?dist.get(v):Infinity)){dist.set(v,nd);prev.set(v,u);todo.add(v)}})}
   if(!prev.has(e))return null;const out=[];let x=prev.get(e);while(x&&x!==s){out.unshift(g.C.get(x));x=prev.get(x)}
   return{pts:out,direct:false}}
+const backBtn=()=>hist.length?`<button id="nback">&#8630; Back: undo ${hist[hist.length-1].label}</button>`:'';
+const wireBack=()=>{const b=document.getElementById('nback');if(b)b.onclick=undo};
 function renderNext(){document.querySelectorAll('.poly.next').forEach(p=>p.classList.remove('next'));gNext.innerHTML='';nextAnim=null;
   if(editOn){next.style.display='none';return}next.style.display='';
   const pick=pickNext();
   if(!pick){legFit=null;const nf=[...new Set([...notflown].map(j=>D.order[j].flight))];
-    next.innerHTML=`<div class="lab">Capture complete</div><div class="fl">All flights done</div>${nf.length?`<div class="meta">Not flown today: ${nf.join(', ')}</div>`:''}<div class="meta">Use Reset on the Checklist to start next week.</div>`;return}
+    next.innerHTML=`<div class="lab">Capture complete</div><div class="fl">All flights done</div>${nf.length?`<div class="meta">Not flown today: ${nf.join(', ')}</div>`:''}<div class="meta">Use Reset on the Checklist to start next week.</div>${backBtn()}`;wireBack();return}
   const k=pick.k;
   const o=D.order[k],t=tolOf(k);o.members.forEach(m=>shapes[idx[m]].pe.classList.add('next'));
   const prevK=(last!==null&&done.has(last))?last:null,p=prevK!==null?tolOf(prevK):D.tols.find(x=>x.base);
@@ -459,16 +477,22 @@ function renderNext(){document.querySelectorAll('.poly.next').forEach(p=>p.class
   else lines.push(prevK!==null?'Same TOL as the last flight':'First flight of the day');
   const ent=getEnt(t.id);if(ent)lines.push('Entrance marked on the map');
   const tag=pick.mode==='moved'?'<span class="tag mv">Moved up</span>':pick.mode==='reopened'?'<span class="tag mv">Reopened</span>':pick.mode==='return'?'<span class="tag sk">Skipped earlier</span>':'';
-  const sk=[];new Set([...skipped].filter(j=>open_(j)&&j!==k).map(j=>pairOf(j)[0])).forEach(j=>sk.push(j));
+  const sk=[];new Set([...skipped].filter(j=>open_(j)&&j!==k).map(j=>pairOf(j)[0])).forEach(j=>{const g=gateOf(j);if(g>=0&&skipped.has(g)&&open_(g))return;sk.push(j)});
+  const skLabel=j=>{const deps=dependentsOf(j).filter(d=>skipped.has(d)&&open_(d)).map(d=>D.order[d].flight);return D.order[j].flight+(deps.length?' + '+deps.join(' + '):'')};
   next.innerHTML=`<div class="lab">Next up · #${k+1} of ${D.order.length}</div><div class="fl">${o.flight}${tag}</div>
    <div class="meta">${TN(t.id)} · ${acr(o).toFixed(0)} ac · ~${o.min} min${o.note?' · '+o.note:''}</div>${lines.map(l=>`<div class="meta">${l}</div>`).join('')}
    <div class="btns"><a href="${dir((ent||[0,t.lat])[1],(ent||[t.lon])[0])}" target="_blank" rel="noopener">Directions${ent?' to gate':''}</a><button id="nskip" class="skip">${pick.mode==='return'?'Not flown':'Skip'}</button><button id="ndone" class="done">Done &#10003;</button></div>
-   ${sk.length?`<div class="skips">Skipped: ${sk.sort((a,b)=>a-b).map(j=>`<button data-fly="${j}">${D.order[j].flight} · Open again</button>`).join('')}</div>`:''}`;
+   ${sk.length?`<div class="skips">Skipped: ${sk.sort((a,b)=>a-b).map(j=>`<button data-fly="${j}">${skLabel(j)} · Open again</button>`).join('')}</div>`:''}${backBtn()}`;
   const sameTol=prevK!==null&&p.id===t.id;
   legFit={path,t,next:o.members,prev:(prevK!==null&&!sameTol)?D.order[prevK].members:[],sameTol};
-  ndone.onclick=()=>{markDone(k,true);save();refresh();fitLeg()};
-  nskip.onclick=()=>{const pr=pairOf(k).filter(open_);if(pick.mode==='return'){pr.forEach(j=>{notflown.add(j);skipped.delete(j)})}else pr.forEach(j=>{skipped.add(j);delete tags[j]});save();refresh();fitLeg()};
-  next.querySelectorAll('[data-fly]').forEach(b=>b.onclick=()=>reinsert(+b.dataset.fly));
+  ndone.onclick=()=>{snap('Done on '+fl(k));markDone(k,true);save();refresh();fitLeg()};
+  nskip.onclick=()=>{snap((pick.mode==='return'?'Not flown on ':'Skip on ')+D.order[k].flight);const pr=pairOf(k).filter(open_);
+    if(pick.mode==='return'){const g=gateOf(k),grp=[...pr,...dependentsOf(k).filter(d=>skipped.has(d)).flatMap(d=>pairOf(d)),...(g>=0&&skipped.has(g)?pairOf(g):[])].filter(open_);
+      grp.forEach(j=>{notflown.add(j);skipped.delete(j)})}
+    else{const dep=dependentsOf(k).flatMap(d=>pairOf(d).filter(open_));[...pr,...dep].forEach(j=>{skipped.add(j);delete tags[j]})}
+    save();refresh();fitLeg()};
+  wireBack();
+  next.querySelectorAll('[data-fly]').forEach(b=>b.onclick=()=>{snap('Open again on '+skLabel(+b.dataset.fly));reinsert(+b.dataset.fly)});
   const ring=el('circle',{cx:t.x,cy:t.y,r:1,class:'nextring'});gNext.appendChild(ring);
   let line=null,dot=null,xy=null,cum=null;
   if(path){xy=path.map(q=>P(q[0],q[1]));cum=[0];for(let i=1;i<xy.length;i++)cum.push(cum[i-1]+Math.hypot(xy[i][0]-xy[i-1][0],xy[i][1]-xy[i-1][1]));
