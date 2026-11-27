@@ -202,7 +202,7 @@ const shapes=D.areas.map((a,i)=>{
   const cls=a.kind==='support'?'support':a.status;
   const pe=el('polygon',{points:pts.map(p=>p.join(',')).join(' '),class:'poly '+cls,'data-i':i});
   gP.appendChild(pe);
-  const lab=a.kind==='array'?a.name.replace('Array ',''):({Offices:'ELDY',Substation:'SUB','West Laydown':'WLDY'}[a.name]||a.name);
+  const lab=a.kind==='array'?a.name.replace('Array ',''):({Offices:'Offices (ELDY)',Substation:'SUB','West Laydown':'WLDY'}[a.name]||a.name);
   const te=el('text',{x:cx,y:cy,class:'lbl'});te.textContent=lab;gL.appendChild(te);
   return {pe,te,cx,cy,bb:pts};
 });
