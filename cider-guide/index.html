@@ -94,6 +94,21 @@ svg{width:100%;height:100%;display:block;user-select:none;-webkit-user-select:no
 #next .btns button{flex:1;border:1px solid var(--line);background:#fff;border-radius:9px;padding:11px 8px;font:inherit;font-size:14px;font-weight:600;color:var(--ink)}
 #next .btns button.done{background:var(--ok);border-color:var(--ok);color:#fff}
 #offline{border:1px solid var(--tol);background:#fff;color:var(--tol);border-radius:8px;padding:8px 12px;font:inherit;font-size:13px;font-weight:600}
+.ent{fill:#7c3aed;stroke:#fff;stroke-width:2;vector-effect:non-scaling-stroke;pointer-events:none}
+.trcur{stroke:#e8590c;stroke-width:4;fill:none;vector-effect:non-scaling-stroke;stroke-linejoin:round;stroke-linecap:round;pointer-events:none}
+.trfaint{stroke:#fff;stroke-width:3;fill:none;opacity:.7;vector-effect:non-scaling-stroke;stroke-linejoin:round;pointer-events:none}
+.vtx{fill:#fff;stroke:#e8590c;stroke-width:2;vector-effect:non-scaling-stroke;pointer-events:none}
+.ering{fill:none;stroke:#7c3aed;stroke-width:3;vector-effect:non-scaling-stroke;pointer-events:none}
+#edit{display:none;margin:8px 12px 0;background:var(--card);border:1px solid var(--line);border-left:4px solid #7c3aed;border-radius:12px;padding:12px 14px}
+#edit .lab{font-size:11.5px;font-weight:700;letter-spacing:.06em;color:#7c3aed;text-transform:uppercase;margin-bottom:6px}
+#edit #ehint{font-size:12.5px;line-height:1.3}
+#edit select{width:100%;font:inherit;font-size:16px;padding:8px 10px;border:1px solid var(--line);border-radius:9px;background:#fff;margin:8px 0 6px;color:var(--ink)}
+#edit .meta{font-size:13px;color:var(--muted)}
+#edit .btns{gap:6px}#edit .btns button{flex:1;border:1px solid var(--line);background:#fff;border-radius:9px;padding:10px 4px;font:inherit;font-size:13.5px;font-weight:600;color:var(--ink)}
+#edit .btns button.pri{background:#7c3aed;border-color:#7c3aed;color:#fff}
+#edit textarea{width:100%;height:110px;font:12px ui-monospace,Menlo,monospace;margin-top:8px;border:1px solid var(--line);border-radius:8px;padding:6px;display:none}
+.seg{display:flex;gap:6px}.seg button{flex:1;border:1px solid var(--line);background:#fff;border-radius:8px;padding:8px;font:inherit;font-size:14px;font-weight:600;color:var(--ink)}
+.seg button.on{background:var(--ink);color:#fff;border-color:var(--ink)}
 footer{padding:6px 16px 28px;font-size:12px;color:var(--muted)}
 </style>
 </head>
@@ -108,11 +123,20 @@ footer{padding:6px 16px 28px;font-size:12px;color:var(--muted)}
 
 <div id="mapview">
   <div id="mapwrap">
-    <svg id="svg"><g id="gTile"></g><g id="gPoly"></g><g id="gChain"></g><g id="gLink"></g><g id="gNext"></g><g id="gTol"></g><g id="gLbl"></g><g id="gMe"></g></svg>
+    <svg id="svg"><g id="gTile"></g><g id="gPoly"></g><g id="gChain"></g><g id="gLink"></g><g id="gNext"></g><g id="gEnt"></g><g id="gEdit"></g><g id="gTol"></g><g id="gLbl"></g><g id="gMe"></g></svg>
     <div id="attrib">Imagery: NYS ITS Geospatial Services, Spring 2023</div><div id="geomsg"></div>
-    <div class="ctrl"><button id="zin" aria-label="Zoom in">+</button><button id="zout" aria-label="Zoom out">&minus;</button><button id="zfit" aria-label="Fit site" style="font-size:13px">Fit</button><button id="bgps" class="sm" aria-label="Show my location">GPS</button><button id="bimg" class="sm" aria-label="Aerial imagery">Aerial</button></div>
+    <div class="ctrl"><button id="zin" aria-label="Zoom in">+</button><button id="zout" aria-label="Zoom out">&minus;</button><button id="zfit" aria-label="Fit site" style="font-size:13px">Fit</button><button id="bgps" class="sm" aria-label="Show my location">GPS</button><button id="bimg" class="sm" aria-label="Aerial imagery">Aerial</button><button id="bedit" class="sm" aria-label="Edit routes and entrances">Edit</button></div>
   </div>
   <div id="next"></div>
+  <div id="edit">
+    <div class="lab">Edit routes and entrances</div>
+    <div class="seg" id="emode"><button data-m="route" class="on">Trace route</button><button data-m="ent">Entrance</button></div>
+    <select id="esel"></select>
+    <div class="meta" id="ehint"></div>
+    <div class="btns"><button id="eundo">Undo</button><button id="eclear">Clear</button><button id="ecopy" class="pri">Copy</button><button id="eexit">Done</button></div>
+    <div class="meta" id="estat" style="margin-top:8px"></div>
+    <textarea id="eout" readonly></textarea>
+  </div>
   <div class="legend">
     <span><i style="background:var(--okf);border:1.5px solid var(--ok)"></i>TOL in or next to area</span>
     <span><i style="background:rgba(29,78,216,.16);border:1.5px solid #1d4ed8"></i>Chained from another TOL</span>
@@ -121,6 +145,7 @@ footer{padding:6px 16px 28px;font-size:12px;color:var(--muted)}
     <span><i style="background:rgba(120,120,120,.35);border:1.5px solid #8a8a8a"></i>Captured</span>
     <span><i style="background:var(--tol);border-radius:50%"></i>TOL</span>
     <span><i style="background:#b91c1c;border-radius:50%"></i>Base</span>
+    <span><i style="background:#7c3aed;transform:rotate(45deg);width:10px;height:10px"></i>Entrance</span>
   </div>
   <div id="card"></div>
 </div>
@@ -184,7 +209,7 @@ function fit(b){const r=svg.getBoundingClientRect(),asp=r.width/r.height;let[x,y
 function apply(){svg.setAttribute('viewBox',vb.join(' '));
   const r=svg.getBoundingClientRect(),s=vb[2]/r.width,g=s/K; // map units per px, ground meters per px
   const fs=(g>14?10:g>7?11.5:13)*s,tr=(g>14?6:g>7?9:11)*s;
-  sizeMe(s);scheduleTiles();
+  sizeMe(s);scheduleTiles();drawEnt(s);if(editOn)drawEdit(s);
   shapes.forEach(sh=>{sh.te.setAttribute('font-size',fs);sh.te.style.strokeWidth=(3*s)+'px';});
   tolEls.forEach(t=>t.c.setAttribute('r',tr*0.75));
   const ah=4.5*s;document.querySelectorAll('.chainar').forEach(p=>p.setAttribute('d',`M${-ah},${-ah*0.7} L${ah},0 L${-ah},${ah*0.7} Z`)||p.setAttribute('transform',`translate(${p.dataset.x},${p.dataset.y}) rotate(${p.dataset.a})`));
@@ -206,6 +231,7 @@ svg.addEventListener('pointermove',e=>{if(!pts.has(e.pointerId))return;pts.set(e
     vb=[startVB[0]-dx*s,startVB[1]-dy*s,startVB[2],startVB[3]];moved=99}
   apply()});
 function up(e){const wasTap=pts.size===1&&moved<4;pts.delete(e.pointerId);start=pts.size?snap():null;startVB=[...vb];
+  if(wasTap&&editOn){const[x,y]=toSvg(e.clientX,e.clientY);editTap(x/R*180/Math.PI,(2*Math.atan(Math.exp(-y/R))-Math.PI/2)*180/Math.PI);return}
   if(wasTap){const t=document.elementFromPoint(e.clientX,e.clientY);if(t&&t.dataset.t)selTol(+t.dataset.t);else if(t&&t.dataset.i)selArea(+t.dataset.i);}}
 svg.addEventListener('pointerup',up);svg.addEventListener('pointercancel',e=>{pts.delete(e.pointerId);start=null});
 svg.addEventListener('wheel',e=>{e.preventDefault();zoomAt(e.deltaY>0?1.2:1/1.2,e.clientX,e.clientY)},{passive:false});
@@ -330,27 +356,89 @@ const hav=(a,b)=>{const r=Math.PI/180,dl=(b[1]-a[1])*r,dn=(b[0]-a[0])*r,h=Math.s
 const distTxt=m=>{const ft=m*3.28084;return ft<1000?`${Math.round(ft/10)*10} ft`:`${(ft/5280).toFixed(1)} mi`};
 const tolOf=k=>tolById[D.areas[idx[D.order[k].members[0]]].tol];
 let nextAnim=null,nextRaf;
+// ---- traced routes and entrances: baked data plus this phone's edits
+const BAKED={entrances:{},routes:{}};
+let EDITS={entrances:{},routes:{}};try{EDITS=Object.assign(EDITS,JSON.parse(localStorage.getItem('cider-edits-v1')||'{}'))}catch(e){}
+const saveEdits=()=>{try{localStorage.setItem('cider-edits-v1',JSON.stringify(EDITS))}catch(e){}};
+const getRoute=k=>{const v=(k in EDITS.routes)?EDITS.routes[k]:BAKED.routes[k];return v&&v.length?v:null};
+const getEnt=id=>{const v=(id in EDITS.entrances)?EDITS.entrances[id]:BAKED.entrances[id];return v||null};
+const pathLen=L=>{let d=0;for(let i=1;i<L.length;i++)d+=hav(L[i-1],L[i]);return d};
+function drawEnt(s){s=s||vb[2]/svg.getBoundingClientRect().width;gEnt.innerHTML='';const h=6*s;
+  D.tols.forEach(t=>{const e=getEnt(t.id);if(!e)return;const[x,y]=P(e[0],e[1]);
+    gEnt.appendChild(el('rect',{x:x-h,y:y-h,width:2*h,height:2*h,class:'ent',transform:`rotate(45 ${x} ${y})`}))})}
+
 function renderNext(){document.querySelectorAll('.poly.next').forEach(p=>p.classList.remove('next'));gNext.innerHTML='';nextAnim=null;
+  if(editOn){next.style.display='none';return}next.style.display='';
   const k=D.order.findIndex((o,j)=>!done.has(j));
   if(k<0){next.innerHTML='<div class="lab">Capture complete</div><div class="fl">All flights done</div><div class="meta">Use Reset on the Checklist to start next week.</div>';return}
   const o=D.order[k],t=tolOf(k);o.members.forEach(m=>shapes[idx[m]].pe.classList.add('next'));
-  let from=null,fromTxt='';
-  if(me){from=[me.lon,me.lat];fromTxt='from you'}else if(k>0){const p=tolOf(k-1);if(p.id!==t.id){from=[p.lon,p.lat];fromTxt='from the '+TN(p.id)}}
-  const dist=from?`${distTxt(hav(from,[t.lon,t.lat]))} straight-line ${fromTxt}`:(k>0?'Same TOL as the last flight':'First flight of the day');
+  const p=k>0?tolOf(k-1):null,route=p&&p.id!==t.id?getRoute(p.id+'>'+t.id):null;
+  let path=null,lines=[];
+  if(route){path=[[p.lon,p.lat],...route,[t.lon,t.lat]];lines.push(`${distTxt(pathLen(path))} along the traced route from the ${TN(p.id)}`);
+    if(me)lines.push(`${distTxt(hav([me.lon,me.lat],[t.lon,t.lat]))} straight-line from you`)}
+  else if(me){path=[[me.lon,me.lat],[t.lon,t.lat]];lines.push(`${distTxt(hav(path[0],path[1]))} straight-line from you`)}
+  else if(p&&p.id!==t.id){path=[[p.lon,p.lat],[t.lon,t.lat]];lines.push(`${distTxt(hav(path[0],path[1]))} straight-line from the ${TN(p.id)}`)}
+  else lines.push(k>0?'Same TOL as the last flight':'First flight of the day');
+  const ent=getEnt(t.id);if(ent)lines.push('Entrance marked on the map');
   next.innerHTML=`<div class="lab">Next up · #${k+1} of ${D.order.length}</div><div class="fl">${o.flight}</div>
-   <div class="meta">${TN(t.id)} · ${acr(o).toFixed(0)} ac · ~${o.min} min${o.note?' · '+o.note:''}</div><div class="meta">${dist}</div>
-   <div class="btns"><a href="${dir(t.lat,t.lon)}" target="_blank" rel="noopener">Directions</a><button id="nshow">Show</button><button id="ndone" class="done">Done &#10003;</button></div>`;
-  nshow.onclick=()=>{selArea(idx[o.members[0]],true)};
+   <div class="meta">${TN(t.id)} · ${acr(o).toFixed(0)} ac · ~${o.min} min${o.note?' · '+o.note:''}</div>${lines.map(l=>`<div class="meta">${l}</div>`).join('')}
+   <div class="btns"><a href="${dir((ent||[0,t.lat])[1],(ent||[t.lon])[0])}" target="_blank" rel="noopener">Directions${ent?' to gate':''}</a><button id="nshow">Show</button><button id="ndone" class="done">Done &#10003;</button></div>`;
+  nshow.onclick=()=>{if(path){const xy=path.map(q=>P(q[0],q[1])),xs=xy.map(q=>q[0]),ys=xy.map(q=>q[1]);const x0=Math.min(...xs),x1=Math.max(...xs),y0=Math.min(...ys),y1=Math.max(...ys),m=150*K;flyTo([x0-m,y0-m,x1-x0+2*m,y1-y0+2*m])}else selArea(idx[o.members[0]],true)};
   ndone.onclick=()=>{done.add(k);save();refresh()};
-  const[tx,ty]=[t.x,t.y];const ring=el('circle',{cx:tx,cy:ty,r:1,class:'nextring'});gNext.appendChild(ring);
-  let line=null,dot=null,fx,fy;
-  if(from){[fx,fy]=P(from[0],from[1]);line=el('line',{x1:fx,y1:fy,x2:tx,y2:ty,class:'nextln'});dot=el('circle',{cx:fx,cy:fy,r:1,class:'nextdot'});gNext.appendChild(line);gNext.appendChild(dot)}
-  nextAnim={ring,line,dot,fx,fy,tx,ty,t0:performance.now()};cancelAnimationFrame(nextRaf);nextRaf=requestAnimationFrame(animNext)}
+  const ring=el('circle',{cx:t.x,cy:t.y,r:1,class:'nextring'});gNext.appendChild(ring);
+  let line=null,dot=null,xy=null,cum=null;
+  if(path){xy=path.map(q=>P(q[0],q[1]));cum=[0];for(let i=1;i<xy.length;i++)cum.push(cum[i-1]+Math.hypot(xy[i][0]-xy[i-1][0],xy[i][1]-xy[i-1][1]));
+    line=el('polyline',{points:xy.map(q=>q.join(',')).join(' '),class:'nextln','stroke-linejoin':'round'});dot=el('circle',{cx:xy[0][0],cy:xy[0][1],r:1,class:'nextdot'});gNext.appendChild(line);gNext.appendChild(dot)}
+  nextAnim={ring,line,dot,xy,cum,t0:performance.now()};cancelAnimationFrame(nextRaf);nextRaf=requestAnimationFrame(animNext)}
 function animNext(now){const a=nextAnim;if(!a)return;const s=vb[2]/svg.getBoundingClientRect().width,e=(now-a.t0)/1000;
   const ph=(e%1.6)/1.6;a.ring.setAttribute('r',(10+18*ph)*s);a.ring.style.opacity=1-ph;
   if(a.line){a.line.style.strokeDasharray=`${9*s} ${7*s}`;a.line.style.strokeDashoffset=-(e*32*s)%(16*s);
-    const q=(e%2.4)/2.4,qe=q<.5?2*q*q:1-Math.pow(-2*q+2,2)/2;a.dot.setAttribute('cx',a.fx+(a.tx-a.fx)*qe);a.dot.setAttribute('cy',a.fy+(a.ty-a.fy)*qe);a.dot.setAttribute('r',6*s)}
+    const T=a.cum[a.cum.length-1],dur=Math.min(6,Math.max(2.4,T/(400*s))),q=(e%dur)/dur,qe=q<.5?2*q*q:1-Math.pow(-2*q+2,2)/2,d=qe*T;
+    let i=1;while(i<a.cum.length-1&&a.cum[i]<d)i++;const seg=a.cum[i]-a.cum[i-1]||1,f=(d-a.cum[i-1])/seg;
+    a.dot.setAttribute('cx',a.xy[i-1][0]+(a.xy[i][0]-a.xy[i-1][0])*f);a.dot.setAttribute('cy',a.xy[i-1][1]+(a.xy[i][1]-a.xy[i-1][1])*f);a.dot.setAttribute('r',6*s)}
   nextRaf=requestAnimationFrame(animNext)}
+
+// ---- edit mode: trace legs along the road on the aerial image, place entrances
+let editOn=false,emodeV='route';
+const LEGS=[];{const seen=new Set();for(let k=1;k<D.order.length;k++){const p=tolOf(k-1),t=tolOf(k);if(p.id===t.id)continue;const key=p.id+'>'+t.id;if(seen.has(key))continue;seen.add(key);
+  LEGS.push({key,from:p,to:t,label:`#${k} ${D.order[k-1].flight} to #${k+1} ${D.order[k].flight}`})}}
+const ETOLS=[];{const seen=new Set();D.order.forEach((o,k)=>{const t=tolOf(k);if(!seen.has(t.id)){seen.add(t.id);ETOLS.push({t,label:`${TN(t.id)} (${o.flight})`})}})}
+function fillSel(keep){const v=keep?esel.value:null;
+  esel.innerHTML=emodeV==='route'?LEGS.map(l=>`<option value="${l.key}">${getRoute(l.key)?'✓ ':''}${l.label}</option>`).join('')
+    :ETOLS.map(e=>`<option value="${e.t.id}">${getEnt(e.t.id)?'✓ ':''}${e.label}</option>`).join('');
+  if(v)esel.value=v;
+  ehint.textContent=emodeV==='route'?'Tap points along the road from the start TOL to the end TOL. The line joins both TOLs automatically.':'Tap where you turn off the road into this array. Tap again to move it.';
+  const nr=LEGS.filter(l=>getRoute(l.key)).length,ne=D.tols.filter(t=>getEnt(t.id)).length;estat.textContent=`${nr} of ${LEGS.length} routes traced · ${ne} entrance${ne===1?'':'s'} placed`}
+function curLeg(){return LEGS.find(l=>l.key===esel.value)}
+function curRoute(){const k=esel.value;return ((k in EDITS.routes)?EDITS.routes[k]:BAKED.routes[k])||[]}
+function focusSel(){if(emodeV==='route'){const l=curLeg();if(!l)return;const pts=[[l.from.x,l.from.y],[l.to.x,l.to.y],...curRoute().map(q=>P(q[0],q[1]))],xs=pts.map(q=>q[0]),ys=pts.map(q=>q[1]),m=200*K;
+    flyTo([Math.min(...xs)-m,Math.min(...ys)-m,Math.max(...xs)-Math.min(...xs)+2*m,Math.max(...ys)-Math.min(...ys)+2*m])}
+  else{const t=tolById[+esel.value];flyTo([t.x-400*K,t.y-400*K,800*K,800*K])}}
+function drawEdit(s){s=s||vb[2]/svg.getBoundingClientRect().width;gEdit.innerHTML='';if(!editOn)return;
+  if(emodeV==='route'){LEGS.forEach(l=>{if(l.key===esel.value)return;const r=getRoute(l.key);if(!r)return;
+      gEdit.appendChild(el('polyline',{points:[[l.from.lon,l.from.lat],...r,[l.to.lon,l.to.lat]].map(q=>P(q[0],q[1]).join(',')).join(' '),class:'trfaint'}))});
+    const l=curLeg();if(!l)return;const r=curRoute(),xy=[[l.from.x,l.from.y],...r.map(q=>P(q[0],q[1])),[l.to.x,l.to.y]];
+    gEdit.appendChild(el('polyline',{points:xy.map(q=>q.join(',')).join(' '),class:'trcur'}));
+    r.forEach(q=>{const[x,y]=P(q[0],q[1]);gEdit.appendChild(el('circle',{cx:x,cy:y,r:5*s,class:'vtx'}))});
+    [l.from,l.to].forEach(t=>gEdit.appendChild(el('circle',{cx:t.x,cy:t.y,r:16*s,class:'ering',style:'stroke:#e8590c'})))}
+  else{const t=tolById[+esel.value];if(t)gEdit.appendChild(el('circle',{cx:t.x,cy:t.y,r:16*s,class:'ering'}))}}
+function editTap(lon,lat){const p=[+lon.toFixed(6),+lat.toFixed(6)];
+  if(emodeV==='route'){EDITS.routes[esel.value]=[...curRoute(),p]}else{EDITS.entrances[esel.value]=p}
+  saveEdits();fillSel(true);drawEdit();drawEnt();eout.style.display='none'}
+bedit.onclick=()=>{editOn=!editOn;bedit.classList.toggle('on',editOn);edit.style.display=editOn?'block':'none';
+  if(editOn){if(!showImg){showImg=true;tiles()}fillSel();focusSel();mapwrap.scrollIntoView({behavior:'smooth',block:'start'})}
+  drawEdit();renderNext()};
+eexit.onclick=()=>bedit.onclick();
+emode.addEventListener('click',e=>{const b=e.target.closest('button');if(!b)return;emodeV=b.dataset.m;emode.querySelectorAll('button').forEach(x=>x.classList.toggle('on',x===b));fillSel();focusSel();drawEdit()});
+esel.onchange=()=>{focusSel();drawEdit()};
+eundo.onclick=()=>{if(emodeV==='route'){const r=curRoute().slice(0,-1);EDITS.routes[esel.value]=r.length?r:null}else EDITS.entrances[esel.value]=null;saveEdits();fillSel(true);drawEdit();drawEnt()};
+eclear.onclick=()=>{if(!eclear.dataset.armed){eclear.dataset.armed=1;eclear.textContent='Tap to confirm';setTimeout(()=>{eclear.textContent='Clear';delete eclear.dataset.armed},3000);return}
+  delete eclear.dataset.armed;eclear.textContent='Clear';if(emodeV==='route')EDITS.routes[esel.value]=null;else EDITS.entrances[esel.value]=null;saveEdits();fillSel(true);drawEdit();drawEnt()};
+ecopy.onclick=async()=>{const out={entrances:{},routes:{}};
+  D.tols.forEach(t=>{const e=getEnt(t.id);if(e)out.entrances[t.id]=e});LEGS.forEach(l=>{const r=getRoute(l.key);if(r)out.routes[l.key]=r});
+  const txt='Cider guide edits v1\n'+JSON.stringify(out);eout.value=txt;
+  try{await navigator.clipboard.writeText(txt);estat.textContent='Copied. Paste it into the chat with Claude to make it permanent.';eout.style.display='none'}
+  catch(e){eout.style.display='block';eout.focus();eout.select();estat.textContent='Copy the text below and paste it into the chat with Claude.'}};
 
 renderList();
 requestAnimationFrame(()=>fit([minx,miny,maxx-minx,maxy-miny]));
