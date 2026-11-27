@@ -125,6 +125,9 @@ svg{width:100%;height:100%;display:block;user-select:none;-webkit-user-select:no
 #next .btns button.skip{color:#7a4a00;border-color:#e8b45c}
 .skips{margin-top:10px;padding-top:8px;border-top:1px solid #eee;font-size:13px;color:var(--muted)}
 .skips button{border:1px solid #e8b45c;background:#fff8ec;color:#7a4a00;border-radius:8px;padding:6px 10px;font:inherit;font-size:13px;font-weight:700;margin:4px 6px 0 0}
+#nrec{display:block;width:100%;margin-top:8px;border:1px solid #c2410c;background:#fff;color:#c2410c;border-radius:9px;padding:10px;font:inherit;font-size:14px;font-weight:700}
+#nrec.on{background:#c2410c;color:#fff}.recnote{font-size:12.5px;color:var(--muted);margin-top:6px}.recnote button{border:1px solid var(--line);background:#fff;border-radius:7px;padding:4px 9px;font:inherit;font-size:12.5px;font-weight:700;margin-left:6px}
+.recln{fill:none;stroke:#c2410c;stroke-width:3;vector-effect:non-scaling-stroke;stroke-linejoin:round}.recold{fill:none;stroke:#c2410c;stroke-width:2;stroke-dasharray:4 4;vector-effect:non-scaling-stroke;opacity:.7}
 #nback{display:block;width:100%;margin-top:10px;border:1px dashed var(--line);background:#fafaf8;color:var(--muted);border-radius:9px;padding:10px;font:inherit;font-size:13.5px;font-weight:600}
 .tag.ok{background:#e7f4ec;color:#1f5c35}
 footer{padding:6px 16px 28px;font-size:12px;color:var(--muted)}
@@ -141,7 +144,7 @@ footer{padding:6px 16px 28px;font-size:12px;color:var(--muted)}
 
 <div id="mapview">
   <div id="mapwrap">
-    <svg id="svg"><g id="gTile"></g><g id="gPoly"></g><g id="gChain"></g><g id="gLink"></g><g id="gNext"></g><g id="gEnt"></g><g id="gEdit"></g><g id="gTol"></g><g id="gLbl"></g><g id="gMe"></g></svg>
+    <svg id="svg"><g id="gTile"></g><g id="gPoly"></g><g id="gChain"></g><g id="gLink"></g><g id="gNext"></g><g id="gRec"></g><g id="gEnt"></g><g id="gEdit"></g><g id="gTol"></g><g id="gLbl"></g><g id="gMe"></g></svg>
     <div id="attrib">Imagery: NYS ITS Geospatial Services, Spring 2023</div><div id="geomsg"></div>
     <div class="ctrl"><button id="zin" aria-label="Zoom in">+</button><button id="zout" aria-label="Zoom out">&minus;</button><button id="zfit" class="sm" aria-label="Show whole site">Site</button><button id="bleg" class="sm" aria-label="Show next leg">Leg</button><button id="bgps" class="sm" aria-label="Show my location">GPS</button><button id="bimg" class="sm" aria-label="Aerial imagery">Aerial</button><button id="bedit" class="sm" aria-label="Edit routes and entrances">Edit</button></div>
   </div>
@@ -489,6 +492,33 @@ bgps.onclick=()=>{if(!navigator.geolocation){geomsgShow('Location is not availab
     e=>{geomsgShow(e.code===1?'Location permission was denied. Allow it in Settings for this site.':'Could not get a location fix',4000);bgps.classList.remove('on');if(watch!==null)navigator.geolocation.clearWatch(watch);watch=null},
     {enableHighAccuracy:true,maximumAge:5000,timeout:20000})};
 
+// ---- drive recorder: logs the actual drive between stops so traced routes can be corrected.
+// Records only while the guide is open on screen (iPhone web apps lose GPS when locked), so it keeps the screen awake.
+let tracks=ld('cider-tracks-v1',{}),rec=null,recWatch=null,wakeLock=null;
+const saveTracks=()=>{try{localStorage.setItem('cider-tracks-v1',JSON.stringify(tracks))}catch(e){}};
+const nTracks=()=>Object.values(tracks).reduce((s,a)=>s+a.length,0);
+async function wake(on){try{if(on&&'wakeLock' in navigator){wakeLock=await navigator.wakeLock.request('screen')}else if(!on&&wakeLock){await wakeLock.release();wakeLock=null}}catch(e){}}
+document.addEventListener('visibilitychange',()=>{if(rec&&document.visibilityState==='visible')wake(true)});
+function drawRec(){gRec.innerHTML='';const old=rec?tracks[rec.key]:(legFit&&legFit.key?tracks[legFit.key]:null);
+  (old||[]).forEach(t=>{if(t.pts.length>1)gRec.appendChild(el('polyline',{points:t.pts.map(q=>P(q[0],q[1]).join(',')).join(' '),class:'recold'}))});
+  if(rec&&rec.pts.length>1)gRec.appendChild(el('polyline',{points:rec.pts.map(q=>P(q[0],q[1]).join(',')).join(' '),class:'recln'}))}
+function startRec(key,label,to){if(!navigator.geolocation){geomsgShow('Location is not available on this device',3000);return}
+  rec={key,label,to,pts:[],t0:Date.now(),stillSince:null};wake(true);geomsgShow('Recording the drive. Keep the guide open on screen.',3500);
+  recWatch=navigator.geolocation.watchPosition(ps=>{if(!rec)return;const c=ps.coords,q=[+c.longitude.toFixed(6),+c.latitude.toFixed(6),Math.round((ps.timestamp-rec.t0)/1000)];
+      me={lon:c.longitude,lat:c.latitude,acc:c.accuracy};drawMe();if(c.accuracy>35)return;
+      const L=rec.pts[rec.pts.length-1],moved=L?hav(L,q):Infinity,dt=L?q[2]-L[2]:Infinity;
+      if(dt>=5||moved>=40){rec.pts.push(q);drawRec();const b=document.getElementById('nrec');if(b)b.textContent=recTxt()}
+      // parked: within 150 m of the stop and under 15 m of movement for 45 s
+      const near=hav(q,[rec.to.lon,rec.to.lat])<150;if(near&&rec.pts.length>3){const back=rec.pts.filter(r=>q[2]-r[2]<=45);
+        if(q[2]-rec.pts[0][2]>45&&back.length&&q[2]-back[0][2]>=40&&back.every(r=>hav(r,q)<15)){stopRec(true)}}},
+    e=>{geomsgShow(e.code===1?'Location permission was denied. Allow it in Settings for this site.':'Could not get a location fix',4000);stopRec(false)},
+    {enableHighAccuracy:true,maximumAge:0,timeout:30000});renderNext()}
+function stopRec(auto){if(recWatch!==null)navigator.geolocation.clearWatch(recWatch);recWatch=null;wake(false);if(!rec)return;const r=rec;rec=null;
+  if(r.pts.length>=3){(tracks[r.key]=tracks[r.key]||[]).push({label:r.label,at:new Date().toISOString().slice(0,16),pts:r.pts});if(tracks[r.key].length>3)tracks[r.key].shift();saveTracks();
+    geomsgShow(`${auto?'Parked. ':''}Drive saved: ${distTxt(pathLen(r.pts))}, ${r.pts.length} points`,3500)}else geomsgShow('Too short to save',2500);renderNext()}
+const recTxt=()=>rec?`\u25A0 Stop recording \u00B7 ${rec.pts.length>1?distTxt(pathLen(rec.pts)):'waiting for GPS'}`:'\u25CF Record drive';
+async function copyTracks(){const txt='Cider guide drives v1\n'+JSON.stringify(tracks);try{await navigator.clipboard.writeText(txt);geomsgShow(`Copied ${nTracks()} drive${nTracks()===1?'':'s'}. Paste them to Claude.`,3500)}catch(e){prompt('Copy this',txt)}}
+
 // ---- Next flight card + animated path to it
 const hav=(a,b)=>{const r=Math.PI/180,dl=(b[1]-a[1])*r,dn=(b[0]-a[0])*r,h=Math.sin(dl/2)**2+Math.cos(a[1]*r)*Math.cos(b[1]*r)*Math.sin(dn/2)**2;return 2*6371000*Math.asin(Math.sqrt(h))};
 const distTxt=m=>{const ft=m*3.28084;return ft<1000?`${Math.round(ft/10)*10} ft`:`${(ft/5280).toFixed(1)} mi`};
@@ -590,10 +620,10 @@ function renderNext(){document.querySelectorAll('.poly.next').forEach(p=>p.class
    <div class="meta">${TN(t.id)} · ${acr(o).toFixed(0)} ac · ~${o.min} min${o.note?' · '+o.note:''}</div>${lines.map(l=>`<div class="meta">${l}</div>`).join('')}
    ${A?`<button id="nalt" class="skip" style="width:100%;margin-top:8px;border:1px solid ${useAlt?'#7c3aed':'var(--line)'};background:${useAlt?'#f3edfd':'#fff'};color:${useAlt?'#5b21b6':'var(--ink)'};border-radius:9px;padding:9px;font:inherit;font-size:13.5px;font-weight:600">${useAlt?'&#10003; Using alternate access':'Use alternate access'}</button>`:''}
    <div class="btns"><a href="${useAlt?dir(launch.lat,launch.lon):dir((ent||[0,t.lat])[1],(ent||[t.lon])[0])}" target="_blank" rel="noopener">Directions${useAlt?' to parking':ent?' to gate':''}</a><button id="nskip" class="skip">${btnL}</button><button id="ndone" class="done">Done &#10003;</button></div>
-   ${clA.length?`<div class="skips">Closed: ${clA.map(a=>`<button data-oa="${a}">${aLabel(a)} · Open</button>`).join('')}</div>`:''}${later.length?`<div class="skips">Later: ${later.sort((a,b)=>a-b).map(j=>`<button data-fly="${j}">${D.order[j].flight} · Ready</button>`).join('')}</div>`:''}${backBtn()}`;
+   ${clA.length?`<div class="skips">Closed: ${clA.map(a=>`<button data-oa="${a}">${aLabel(a)} · Open</button>`).join('')}</div>`:''}${later.length?`<div class="skips">Later: ${later.sort((a,b)=>a-b).map(j=>`<button data-fly="${j}">${D.order[j].flight} · Ready</button>`).join('')}</div>`:''}${path?`<button id="nrec" class="${rec?'on':''}">${recTxt()}</button>`:''}${nTracks()?`<div class="recnote">${nTracks()} drive${nTracks()===1?'':'s'} recorded<button id="ncopyrec">Copy drives</button></div>`:''}${backBtn()}`;
   const sameTol=prevK!==null&&p.id===launch.id;
-  legFit={path,t:launch,next:o.members,prev:(prevK!==null&&!sameTol)?D.order[prevK].members:[],sameTol};
-  ndone.onclick=()=>{histSnap('Done on '+fl(k));markDone(k,true);if(driveIn)lastIn=o.flight;else if(useAlt)lastAlt=o.flight;else if(useGate)lastGate=o.flight;save();refresh();fitLeg()};
+  legFit={key:p.id+'>'+launch.id,path,t:launch,next:o.members,prev:(prevK!==null&&!sameTol)?D.order[prevK].members:[],sameTol};
+  ndone.onclick=()=>{if(rec)stopRec(false);histSnap('Done on '+fl(k));markDone(k,true);if(driveIn)lastIn=o.flight;else if(useAlt)lastAlt=o.flight;else if(useGate)lastGate=o.flight;save();refresh();fitLeg()};
   nskip.onclick=()=>{if(btnL==='Closed'){toggleArea(LA);fitLeg();return}
     histSnap((pick.mode==='return'?'Not flown on ':'Later on ')+D.order[k].flight);const pr=pairOf(k).filter(open_);
     if(pick.mode==='return'){const g=gateOf(k),grp=[...pr,...dependentsOf(k).filter(d=>skipped.has(d)).flatMap(d=>pairOf(d)),...(g>=0&&skipped.has(g)?pairOf(g):[])].filter(open_);
@@ -601,6 +631,8 @@ function renderNext(){document.querySelectorAll('.poly.next').forEach(p=>p.class
     else{const dep=dependentsOf(k).flatMap(d=>pairOf(d).filter(open_));[...pr,...dep].forEach(j=>{skipped.add(j);delete tags[j]})}
     save();refresh();fitLeg()};
   wireBack();
+  const nr=document.getElementById('nrec');if(nr)nr.onclick=()=>{if(rec)stopRec(false);else startRec(p.id+'>'+launch.id,`${fromTxt(p)} to ${o.flight}`,launch)};
+  const nc=document.getElementById('ncopyrec');if(nc)nc.onclick=copyTracks;drawRec();
   const na=document.getElementById('nalt');if(na)na.onclick=()=>{histSnap((useAlt?'Alt access off on ':'Alt access on on ')+o.flight);setAlt(o.flight,!useAlt);renderList();fitLeg()};
   next.querySelectorAll('[data-fly]').forEach(b=>b.onclick=()=>{const j=+b.dataset.fly;histSnap('Ready on '+D.order[j].flight);reinsert(j);fitLeg()});
   next.querySelectorAll('[data-oa]').forEach(b=>b.onclick=()=>{toggleArea(b.dataset.oa);fitLeg()});
@@ -666,7 +698,7 @@ esel.onchange=()=>{focusSel();drawEdit()};
 eundo.onclick=()=>{graph=null;dCache.clear();if(emodeV==='alt'){const r=curRoute().slice(0,-1);EDITS.alts[esel.value]=r.length?r:null}else if(emodeV==='route'){const r=curRoute().slice(0,-1);EDITS.routes[esel.value]=r.length?r:null}else EDITS.entrances[esel.value]=null;saveEdits();fillSel(true);drawEdit();drawEnt()};
 eclear.onclick=()=>{if(!eclear.dataset.armed){eclear.dataset.armed=1;eclear.textContent='Tap to confirm';setTimeout(()=>{eclear.textContent='Clear';delete eclear.dataset.armed},3000);return}
   delete eclear.dataset.armed;eclear.textContent='Clear';graph=null;dCache.clear();if(emodeV==='alt')EDITS.alts[esel.value]=null;else if(emodeV==='route')EDITS.routes[esel.value]=null;else EDITS.entrances[esel.value]=null;saveEdits();fillSel(true);drawEdit();drawEnt()};
-ecopy.onclick=async()=>{const out={entrances:{},routes:{},alts:{}};AFL.forEach(f=>{const a=getAlt(f);if(a)out.alts[f]=a});
+ecopy.onclick=async()=>{const out={entrances:{},routes:{},alts:{},drives:tracks};AFL.forEach(f=>{const a=getAlt(f);if(a)out.alts[f]=a});
   D.tols.forEach(t=>{const e=getEnt(t.id);if(e)out.entrances[t.id]=e});LEGS.forEach(l=>{const r=getRoute(l.key);if(r)out.routes[l.key]=r});
   const txt='Cider guide edits v1\n'+JSON.stringify(out);eout.value=txt;
   try{await navigator.clipboard.writeText(txt);estat.textContent='Copied. Paste it into the chat with Claude to make it permanent.';eout.style.display='none'}
