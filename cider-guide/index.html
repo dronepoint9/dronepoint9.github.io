@@ -110,7 +110,12 @@ svg{width:100%;height:100%;display:block;user-select:none;-webkit-user-select:no
 .seg{display:flex;gap:6px}.seg button{flex:1;border:1px solid var(--line);background:#fff;border-radius:8px;padding:8px;font:inherit;font-size:14px;font-weight:600;color:var(--ink)}
 .seg button.on{background:var(--ink);color:#fff;border-color:var(--ink)}
 .poly.skip{fill:rgba(232,150,20,.38)!important;stroke:#c77a0a!important;stroke-dasharray:5 3}
-.item.skipped{border-left:4px solid #e8960f}.item.nf{border-left:4px solid #b91c1c}
+.item.skipped{border-left:4px solid #e8960f}.item.clrow:not(.skipped){border-left:4px dashed #d9a640}
+.poly.clok{stroke:#c98a12!important;stroke-dasharray:6 4;fill:rgba(240,190,60,.22)!important}
+.chips{display:flex;flex-wrap:wrap;gap:5px;margin-top:5px}.chips button{border:1px solid var(--line);background:#fff;border-radius:7px;padding:4px 9px;font:inherit;font-size:12.5px;font-weight:700;color:var(--ink)}
+.chips button small{font-weight:500;color:var(--muted);font-size:10.5px}.chips button.on,.acts .sk.on{background:#fff1d6;border-color:#d9a640;color:#7a4a00;text-decoration:line-through}
+.chips button.on small{color:#7a4a00}.acts .sk.on{text-decoration:none}
+.cst{display:none;font-weight:600}.cst .ok{color:#8a6100}.cst .wait{color:#b45309}.item.nf{border-left:4px solid #b91c1c}
 .item .mk,.item .sk{border:1px solid var(--tol);background:#fff;color:var(--tol);border-radius:7px;padding:5px 7px;font:inherit;font-size:12.5px;font-weight:700}
 .item .sk{border-color:#e8b45c;color:#7a4a00}.item .sk.op{background:#fff0d6}
 .item .acts{display:flex;gap:5px;flex:none;align-items:center}
@@ -156,7 +161,7 @@ footer{padding:6px 16px 28px;font-size:12px;color:var(--muted)}
     <span><i style="width:16px;height:0;border-top:2px dashed #1d4ed8;border-radius:0;vertical-align:3px"></i>Daisy chain</span>
     <span><i style="background:var(--supf);border:1.5px dashed var(--sup)"></i>Support area</span>
     <span><i style="background:rgba(120,120,120,.35);border:1.5px solid #8a8a8a"></i>Captured</span>
-    <span><i style="background:rgba(232,150,20,.38);border:1.5px dashed #c77a0a"></i>Closed or waiting</span>
+    <span><i style="background:rgba(240,190,60,.22);border:1.5px dashed #c98a12"></i>Closed, still flown</span><span><i style="background:rgba(232,150,20,.38);border:1.5px dashed #c77a0a"></i>Waiting</span>
     <span><i style="background:var(--tol);border-radius:50%"></i>TOL</span>
     <span><i style="background:#b91c1c;border-radius:50%"></i>Base</span>
     <span><i style="background:#7c3aed;transform:rotate(45deg);width:10px;height:10px"></i>Entrance</span>
@@ -291,9 +296,9 @@ const KEY='cider-done-v1';let done=new Set();
 try{done=new Set(JSON.parse(localStorage.getItem(KEY)||'[]'))}catch(e){}
 // skip / not flown / moved-up / last flown, all saved on this phone
 const ld=(k,d)=>{try{const v=localStorage.getItem(k);return v===null?d:JSON.parse(v)}catch(e){return d}};
-let closed=new Set(ld('cider-closed-v1',[])),skipped=new Set(ld('cider-skip-v1',[])),notflown=new Set(ld('cider-nf-v1',[])),last=ld('cider-last-v1',null);
+let closed=new Set(ld('cider-closedA-v1',[]).filter(x=>typeof x==='string')),skipped=new Set(ld('cider-skip-v1',[])),notflown=new Set(ld('cider-nf-v1',[])),last=ld('cider-last-v1',null);
 let plan=ld('cider-plan-v1',null),tags=ld('cider-tags-v1',{});if(!Array.isArray(plan)||plan.length!==D.order.length)plan=D.order.map((o,j)=>j);
-const save=()=>{realignAlt();try{localStorage.setItem(KEY,JSON.stringify([...done]));localStorage.setItem('cider-skip-v1',JSON.stringify([...skipped]));localStorage.setItem('cider-closed-v1',JSON.stringify([...closed]));
+const save=()=>{realignAlt();try{localStorage.setItem(KEY,JSON.stringify([...done]));localStorage.setItem('cider-skip-v1',JSON.stringify([...skipped]));localStorage.setItem('cider-closedA-v1',JSON.stringify([...closed]));
   localStorage.setItem('cider-nf-v1',JSON.stringify([...notflown]));localStorage.setItem('cider-plan-v1',JSON.stringify(plan));localStorage.setItem('cider-tags-v1',JSON.stringify(tags));localStorage.setItem('cider-last-v1',JSON.stringify(last));localStorage.setItem('cider-lastalt-v1',JSON.stringify(lastAlt))}catch(e){}};
 // battery pairs: same flight name flown from the same TOL back to back (23, 18, 28)
 const pairOf=k=>{const out=[k];for(let j=k-1;j>=0&&D.order[j].flight===D.order[k].flight;j--)out.unshift(j);for(let j=k+1;j<D.order.length&&D.order[j].flight===D.order[k].flight;j++)out.push(j);return out};
@@ -307,7 +312,7 @@ const ALT_SLOT={'3+5+4':'6'};
 let altMan=ld('cider-altman-v1',{}),lastAlt=ld('cider-lastalt-v1',null);
 const altPt=f=>{const A=getAlt(f);if(!A)return null;const q=A[A.length-1],[x,y]=P(q[0],q[1]);return{id:'alt:'+f,lon:q[0],lat:q[1],x,y,alt:true}};
 function setAlt(f,v){altMan[f]=v;try{localStorage.setItem('cider-altman-v1',JSON.stringify(altMan))}catch(e){}save()}
-const altOn=f=>{if(!getAlt(f))return false;if(f in altMan)return altMan[f];const g=ALT_TRIGGER[f];if(!g)return false;const gi=idxOfFlight(g);if(gi>=0&&pairOf(gi).some(j=>closed.has(j)))return true;const k=idxOfFlight(f);return OUTSIDE[f]==='part'&&k>=0&&pairOf(k).some(j=>closed.has(j))};
+const altOn=f=>{if(!getAlt(f))return false;if(f in altMan)return altMan[f];const g=ALT_TRIGGER[f];if(!g)return false;const gi=idxOfFlight(g);if(gi>=0&&isClosed(gi))return true;const k=idxOfFlight(f);return OUTSIDE[f]==='part'&&k>=0&&isClosed(k)};
 const OUTSIDE={'24+25E+25W':'yes','22':'yes','17':'yes','15W+15E':'yes','2E+2W':'yes','12':'yes','WLDY':'yes','14+13':'yes','6':'yes','19+SS':'yes','21+20':'yes','29':'yes','9+10':'yes','7+8':'yes','Off+26+27':'yes',
   '3+5+4':'part'};
 const OUT_NOTE={'3+5+4':'Different route to 3: park outside the gate. 3 from there, likely 5, maybe 4.'};
@@ -317,19 +322,36 @@ const dependentsOf=k=>Object.keys(ACCESS).filter(d=>ACCESS[d]===D.order[k].fligh
 const gateOf=k=>{const g=ACCESS[D.order[k].flight];return g?idxOfFlight(g):-1};
 // closures: a closed array stays in the order when it can be flown from outside the gate (or by the alternate route);
 // otherwise it waits until it opens. Arrays reached only through a closed array wait too.
-const isClosed=k=>pairOf(k).some(j=>closed.has(j));
+// closures are marked per array. Only the array a flight launches from matters: chained arrays (3, 5 from 4; 13 from 14)
+// and the arrays flown from Base (Offices, 26, 27) can be closed with no effect on the day.
+const launchArea=k=>{const t=tolOf(k);return t.base?null:t.near};
+const isClosed=k=>{const a=launchArea(k);return !!a&&closed.has(a)};
+const AL=n=>n==='Offices'?'Offices (ELDY)':n==='West Laydown'?'WLDY':n==='Substation'?'SS':n.replace('Array ','').replace(/^0/,'');
+const launchOf=a=>[...new Set(flightsOf(a).map(k=>pairOf(k)[0]))].filter(k=>launchArea(k)===a);
+// what a closure (or a closed gate) means for one array, in words; kind: ok = still flown, wait = waiting
+function areaStatus(a){const ks=flightsOf(a),k=ks[0];if(k===undefined||ks.every(j=>!open_(j)))return null;const f=D.order[k].flight;
+  if(closed.has(a)){const la=launchArea(k);
+    if(la!==a)return{kind:'ok',txt:`Closed · no effect, flown from ${la?AL(la):'Base'}`};
+    if(cutOff(k))return{kind:'wait',txt:`Closed · waiting`};
+    return canOutside(f)?{kind:'ok',txt:OUTSIDE[f]==='part'?'Closed · alternate route':'Closed · fly from outside'}:{kind:'wait',txt:'Closed · waiting'}}
+  if(cutOff(k))return{kind:'wait',txt:`Cut off while ${D.order[gateOf(k)].flight} is closed`};
+  if(isClosed(k)&&!canOutside(f))return{kind:'wait',txt:`Waiting: ${AL(launchArea(k))} is closed`};
+  if(ks.some(j=>skipped.has(j)&&open_(j)))return{kind:'wait',txt:'Later'};
+  return null}
 const canOutside=f=>OUTSIDE[f]==='yes'||(OUTSIDE[f]==='part'&&altOn(f));
 const cutOff=k=>{const g=gateOf(k);return g>=0&&isClosed(g)};
-function closeFlight(k){const pr=pairOf(k);pr.forEach(j=>closed.add(j));const f=D.order[k].flight;
-  if(!canOutside(f))pr.filter(open_).forEach(j=>{skipped.add(j);delete tags[j]});
-  dependentsOf(k).forEach(d=>pairOf(d).filter(open_).forEach(j=>{skipped.add(j);delete tags[j]}));save();renderList()}
-function openFlight(k){const pr=pairOf(k);pr.forEach(j=>closed.delete(j));
-  if(pr.some(j=>skipped.has(j)&&open_(j))&&!cutOff(k))reinsert(k);
-  dependentsOf(k).forEach(d=>{if(!isClosed(d)&&pairOf(d).some(j=>skipped.has(j)&&open_(j)))reinsert(d)});save();renderList()}
+const defer=j=>{skipped.add(j);delete tags[j]};
+function closeArea(a){if(closed.has(a))return;closed.add(a);
+  launchOf(a).forEach(k=>{if(!canOutside(D.order[k].flight))pairOf(k).filter(open_).forEach(defer);
+    dependentsOf(k).forEach(d=>pairOf(d).filter(open_).forEach(defer))});save();renderList()}
+function openArea(a){if(!closed.has(a))return;closed.delete(a);
+  launchOf(a).forEach(k=>{if(pairOf(k).some(j=>skipped.has(j)&&open_(j))&&!cutOff(k))reinsert(k);
+    dependentsOf(k).forEach(d=>{if(!isClosed(d)&&pairOf(d).some(j=>skipped.has(j)&&open_(j)))reinsert(d)})});save();renderList()}
+const toggleArea=a=>{histSnap((closed.has(a)?'Open on ':'Closed on ')+AL(a));closed.has(a)?openArea(a):closeArea(a)};
 // undo history (Back button): snapshot of the day state before each action
 let hist=ld('cider-hist-v1',[]).filter(h=>h&&typeof h.label==='string');
 function histSnap(label){hist.push({label,s:JSON.stringify({d:[...done],sk:[...skipped],cl:[...closed],nf:[...notflown],last,plan,tags,am:altMan,la:lastAlt})});if(hist.length>40)hist.shift();try{localStorage.setItem('cider-hist-v1',JSON.stringify(hist))}catch(e){}}
-function undo(){const h=hist.pop();if(!h)return;const s=JSON.parse(h.s);done=new Set(s.d);skipped=new Set(s.sk);closed=new Set(s.cl||[]);notflown=new Set(s.nf);last=s.last;plan=s.plan;tags=s.tags;altMan=s.am||{};lastAlt=s.la||null;try{localStorage.setItem('cider-altman-v1',JSON.stringify(altMan))}catch(e){}
+function undo(){const h=hist.pop();if(!h)return;const s=JSON.parse(h.s);done=new Set(s.d);skipped=new Set(s.sk);closed=new Set((s.cl||[]).filter(x=>typeof x==='string'));notflown=new Set(s.nf);last=s.last;plan=s.plan;tags=s.tags;altMan=s.am||{};lastAlt=s.la||null;try{localStorage.setItem('cider-altman-v1',JSON.stringify(altMan))}catch(e){}
   try{localStorage.setItem('cider-hist-v1',JSON.stringify(hist))}catch(e){}save();renderList();fitLeg()}
 const fl=k=>D.order[k].flight+(pairOf(k).length>1?` (battery ${pairOf(k).indexOf(k)+1})`:'');
 function pickNext(){
@@ -372,33 +394,30 @@ function markDone(k,on){if(on){lastAlt=null;done.add(k);skipped.delete(k);notflo
 const acr=o=>o.members.reduce((s,m)=>s+D.areas[idx[m]].acres,0);
 function areaDone(){const s=new Set();D.order.forEach((o,k)=>{const same=D.order.map((p,j)=>[p,j]).filter(([p])=>p.flight===o.flight);if(same.every(([,j])=>done.has(j)))o.members.forEach(m=>s.add(m))});return s}
 function refresh(){renderNext();const ad=areaDone();D.areas.forEach((a,i)=>shapes[i].pe.classList.toggle('done',ad.has(a.name)));
-  const sk=new Set();D.order.forEach((o,j)=>{if((skipped.has(j)||notflown.has(j)||closed.has(j))&&!done.has(j))o.members.forEach(m=>sk.add(m))});
-  D.areas.forEach((a,i)=>shapes[i].pe.classList.toggle('skip',sk.has(a.name)&&!ad.has(a.name)));
+  const sk=new Set();D.order.forEach((o,j)=>{if((skipped.has(j)||notflown.has(j))&&!done.has(j))o.members.forEach(m=>sk.add(m))});
+  D.areas.forEach((a,i)=>{const w=sk.has(a.name)&&!ad.has(a.name);shapes[i].pe.classList.toggle('skip',w);shapes[i].pe.classList.toggle('clok',!w&&!ad.has(a.name)&&closed.has(a.name))});
   const n=done.size,ac=[...ad].reduce((s,m)=>s+D.areas[idx[m]].acres,0),tot=D.areas.reduce((s,a)=>s+a.acres,0);
-  pfill.style.width=(n/D.order.length*100)+'%';const ncl=new Set([...closed].filter(j=>!done.has(j)).map(j=>D.order[j].flight)).size,nsk=new Set([...skipped].filter(j=>!done.has(j)&&!closed.has(j)).map(j=>D.order[j].flight)).size,nnf=new Set([...notflown].map(j=>D.order[j].flight)).size;
+  pfill.style.width=(n/D.order.length*100)+'%';const ncl=[...closed].filter(a=>!ad.has(a)).length,nsk=new Set([...skipped].filter(j=>open_(j)).map(j=>D.order[j].flight)).size,nnf=new Set([...notflown].map(j=>D.order[j].flight)).size;
   ptxt.textContent=`${n} of ${D.order.length} flights · ${Math.round(ac).toLocaleString()} of ${Math.round(tot).toLocaleString()} ac${ncl?` · ${ncl} closed`:''}${nsk?` · ${nsk} waiting`:''}${nnf?` · ${nnf} not flown`:''}`;
   document.querySelectorAll('.item').forEach(it=>{const on=it.dataset.n!==undefined?ad.has(it.dataset.n):done.has(+it.dataset.k);it.classList.toggle('done',on);it.querySelector('input').checked=on;
-    const ks=it.dataset.n!==undefined?flightsOf(it.dataset.n):[+it.dataset.k];it.classList.toggle('skipped',!on&&ks.some(j=>(skipped.has(j)||closed.has(j))&&!done.has(j)));it.classList.toggle('nf',!on&&ks.some(j=>notflown.has(j)));
+    const ks=it.dataset.n!==undefined?flightsOf(it.dataset.n):[+it.dataset.k];it.classList.toggle('skipped',!on&&ks.some(j=>skipped.has(j)&&!done.has(j)));it.classList.toggle('clrow',!on&&(it.dataset.n!==undefined?closed.has(it.dataset.n):D.order[ks[0]].members.some(m=>closed.has(m))));it.classList.toggle('nf',!on&&ks.some(j=>notflown.has(j)));
     const ac=it.querySelector('.acts');if(ac)ac.style.display=on||ks.every(j=>notflown.has(j))?'none':'';
-    const sb=it.querySelector('.sk');if(sb){const cl=isClosed(ks[0]),g=gateOf(ks[0]),cut=!cl&&cutOff(ks[0]),wait=!cl&&!cut&&ks.some(j=>skipped.has(j)&&open_(j));
-      sb.textContent=cl?'Open':cut?'Cut off':wait?'Open':'Closed';sb.classList.toggle('op',cl||wait);sb.disabled=cut;sb.style.opacity=cut?.45:1;sb.title=cut?`Needs ${D.order[g].flight} open`:''}
-    const st=it.querySelector('.cst');if(st){const k0=ks[0],cl=isClosed(k0),f=D.order[k0].flight;st.textContent=on?'':cl?(canOutside(f)?(OUTSIDE[f]==='part'?'Closed · alternate route':'Closed · fly from outside'):'Closed · waiting'):cutOff(k0)?`Cut off while ${D.order[gateOf(k0)].flight} is closed`:ks.some(j=>skipped.has(j)&&open_(j))?'Later':'';st.style.display=st.textContent?'':'none'}})}
+    it.querySelectorAll('[data-ca]').forEach(b=>{const c=closed.has(b.dataset.ca);b.classList.toggle('on',c);if(b.classList.contains('sk'))b.textContent=c?'Open':'Closed'});
+    const rb=it.querySelector('.rdy');if(rb)rb.style.display=!on&&ks.some(j=>skipped.has(j)&&open_(j))&&!ks.some(j=>isClosed(j)||cutOff(j))?'':'none';
+    const st=it.querySelector('.cst');if(st){const ms=it.dataset.n!==undefined?[it.dataset.n]:D.order[ks[0]].members;const L=on?[]:ms.map(m=>{const x=areaStatus(m);return x&&(ms.length>1?{kind:x.kind,txt:AL(m)+': '+x.txt}:x)}).filter(Boolean);
+      const seen=new Set();st.innerHTML=L.filter(x=>!seen.has(x.txt)&&seen.add(x.txt)).map(x=>`<div class="${x.kind}">${x.txt}</div>`).join('');st.style.display=L.length?'block':'none'}})}
 let sortMode='order';try{sortMode=localStorage.getItem('cider-sort')||'order'}catch(e){}
 const numKey=n=>n.startsWith('Array ')?parseFloat(n.slice(6))+(n.endsWith('E')?.5:0):({Offices:100,Substation:101,'West Laydown':102}[n]);
 const flightsOf=name=>D.order.map((o,k)=>[o,k]).filter(([o])=>o.members.includes(name)).map(([,k])=>k);
 function renderNum(){const L=D.areas.map(a=>a.name).sort((a,b)=>numKey(a)-numKey(b));
   items.innerHTML=L.map(n=>{const a=D.areas[idx[n]],t=tolById[a.tol],ks=flightsOf(n),o=D.order[ks[0]];
-   return `<div class="item" data-n="${n}"><input type="checkbox" aria-label="Done"><div class="num">${o?ks[0]+1:''}</div><div class="body"><div class="fl">${n==='Offices'?'Offices (ELDY)':n==='West Laydown'?'West Laydown (WLDY)':n.replace('Array ','')}</div><div class="meta">${a.acres} ac · ${TN(t.id)}${o&&o.members.length>1?' · in '+o.flight:''}</div></div>${o?`<span class="acts">${t.near===n&&!t.base?`<button class="sk" data-sk="${ks[0]}">Closed</button>`:`<span class="via">Flown from ${t.base?'Base':t.near.replace('Array ','')}</span>`}<button class="mk" data-mk="${ks[0]}">Next</button></span>`:''}<a href="${dir(t.lat,t.lon)}" target="_blank" rel="noopener">Go</a></div>`}).join('');refresh()}
+   return `<div class="item" data-n="${n}"><input type="checkbox" aria-label="Done"><div class="num">${o?ks[0]+1:''}</div><div class="body"><div class="fl">${n==='Offices'?'Offices (ELDY)':n==='West Laydown'?'West Laydown (WLDY)':n.replace('Array ','')}</div><div class="meta">${a.acres} ac · ${TN(t.id)}${o&&o.members.length>1?' · in '+o.flight:''}${o&&(t.base||t.near!==n)?' · flown from '+(t.base?'Base':AL(t.near)):''}</div><div class="meta cst"></div></div>${o?`<span class="acts"><button class="sk" data-ca="${n}">Closed</button><button class="mk" data-mk="${ks[0]}">Next</button></span>`:''}<a href="${dir(t.lat,t.lon)}" target="_blank" rel="noopener">Go</a></div>`}).join('');refresh()}
 function renderList(){document.querySelectorAll('#sortbar button').forEach(b=>b.classList.toggle('on',b.dataset.s===sortMode));if(sortMode==='num')return renderNum();items.innerHTML=plan.map(k=>{const o=D.order[k];const t=tolById[D.areas[idx[o.members[0]]].tol];
-  return `<div class="item" data-k="${k}"><input type="checkbox" aria-label="Done"><div class="num">${k+1}</div><div class="body"><div class="fl">${o.flight}</div><div class="meta">${TN(t.id)} · ${acr(o).toFixed(0)} ac · ~${o.min} min${o.note?' · '+o.note:''}${OUTSIDE[o.flight]==='yes'?'<span class="tag ok">Outside OK</span>':OUTSIDE[o.flight]==='part'?'<span class="tag sk">Part outside</span>':''}</div><div class="meta cst" style="color:#a15c00;font-weight:600;display:none"></div>${OUT_NOTE[o.flight]?`<div class="meta">${OUT_NOTE[o.flight]}</div>`:''}${getAlt(o.flight)?`<button class="altbtn" data-alt="${o.flight}" style="margin-top:4px;border:1px solid ${altOn(o.flight)?'#7c3aed':'var(--line)'};background:${altOn(o.flight)?'#f3edfd':'#fff'};color:${altOn(o.flight)?'#5b21b6':'var(--ink)'};border-radius:7px;padding:4px 8px;font:inherit;font-size:12px;font-weight:700">${altOn(o.flight)?'&#10003; Alt access on':'Alt access'}</button>`:''}</div><span class="acts"><button class="sk" data-sk="${k}">Closed</button><button class="mk" data-mk="${k}">Next</button></span><a href="${dir(t.lat,t.lon)}" target="_blank" rel="noopener">Go</a></div>`}).join('');refresh()}
+  return `<div class="item" data-k="${k}"><input type="checkbox" aria-label="Done"><div class="num">${k+1}</div><div class="body"><div class="fl">${o.flight}</div><div class="meta">${TN(t.id)} · ${acr(o).toFixed(0)} ac · ~${o.min} min${o.note?' · '+o.note:''}${OUTSIDE[o.flight]==='yes'?'<span class="tag ok">Outside OK</span>':OUTSIDE[o.flight]==='part'?'<span class="tag sk">Part outside</span>':''}</div><div class="chips">${o.members.map(m=>`<button data-ca="${m}">${AL(m)}${m===launchArea(k)?' <small>launch</small>':''}</button>`).join('')}</div><div class="meta cst"></div>${OUT_NOTE[o.flight]?`<div class="meta">${OUT_NOTE[o.flight]}</div>`:''}${getAlt(o.flight)?`<button class="altbtn" data-alt="${o.flight}" style="margin-top:4px;border:1px solid ${altOn(o.flight)?'#7c3aed':'var(--line)'};background:${altOn(o.flight)?'#f3edfd':'#fff'};color:${altOn(o.flight)?'#5b21b6':'var(--ink)'};border-radius:7px;padding:4px 8px;font:inherit;font-size:12px;font-weight:700">${altOn(o.flight)?'&#10003; Alt access on':'Alt access'}</button>`:''}</div><span class="acts"><button class="sk rdy op" data-rdy="${k}" style="display:none">Ready</button><button class="mk" data-mk="${k}">Next</button></span><a href="${dir(t.lat,t.lon)}" target="_blank" rel="noopener">Go</a></div>`}).join('');refresh()}
 items.addEventListener('click',e=>{const it=e.target.closest('.item');if(!it||e.target.closest('a'))return;const n=it.dataset.n,k=+it.dataset.k;
   if(e.target.dataset.alt!==undefined){const f=e.target.dataset.alt;histSnap((altOn(f)?'Alt access off on ':'Alt access on on ')+f);setAlt(f,!altOn(f));renderList();return}
-  if(e.target.dataset.sk!==undefined){const j=+e.target.dataset.sk,pr=pairOf(j).filter(open_);if(!pr.length)return;
-    if(cutOff(j))return;
-    if(isClosed(j)){histSnap('Open on '+D.order[j].flight);openFlight(j)}
-    else if(pr.some(x=>skipped.has(x))){histSnap('Open on '+D.order[j].flight);reinsert(j)}
-    else{histSnap('Closed on '+D.order[j].flight);closeFlight(j)}
-    return}
+  const cb=e.target.closest('[data-ca]');if(cb){toggleArea(cb.dataset.ca);return}
+  if(e.target.dataset.rdy!==undefined){const j=+e.target.dataset.rdy;histSnap('Ready on '+D.order[j].flight);reinsert(j);return}
   if(e.target.dataset.mk!==undefined){histSnap('Next on '+D.order[+e.target.dataset.mk].flight);moveUp(+e.target.dataset.mk);show('map');mapwrap.scrollIntoView({behavior:'smooth'});return}
   if(e.target.tagName==='INPUT'){histSnap((e.target.checked?'check on ':'uncheck on ')+(n!==undefined?n.replace('Array ',''):fl(k)));const ks=n!==undefined?flightsOf(n):[k];ks.forEach(j=>markDone(j,e.target.checked));save();refresh();return}
   show('map');selArea(n!==undefined?idx[n]:idx[D.order[k].members[0]],true);mapwrap.scrollIntoView({behavior:'smooth'})});
@@ -532,21 +551,24 @@ function renderNext(){document.querySelectorAll('.poly.next').forEach(p=>p.class
   else lines.push(prevK!==null?'Same TOL as the last flight':'First flight of the day');
   const ent=useAlt?null:getEnt(t.id);if(useAlt)lines.push('Alternate access: park outside the gate and launch from there');else if(ent)lines.push('Entrance marked on the map');
   const clK=isClosed(k),inOrder=clK&&canOutside(o.flight);
+  const clM=o.members.filter(m=>closed.has(m)&&m!==launchArea(k));if(clM.length)lines.push(`${clM.map(AL).join(', ')} closed: no effect, flown from ${launchArea(k)?AL(launchArea(k)):'Base'}`);
   if(clK)lines.push(inOrder?(useAlt?'Closed: take the alternate route and launch from outside the gate':'Closed: fly it from outside the gate'):'Still closed');
   else if(outTxt(o.flight))lines.push(outTxt(o.flight));
   const tag=pick.mode==='alt'?'<span class="tag mv" style="background:#f3edfd;color:#5b21b6">Alternate access</span>':pick.mode==='moved'?'<span class="tag mv">Moved up</span>':pick.mode==='reopened'?'<span class="tag mv">Reopened</span>':pick.mode==='return'?`<span class="tag sk">${clK?'Still closed':'Left for later'}</span>`:clK?'<span class="tag sk">Closed</span>':'';
-  // everything closed or waiting, one button per block; an array cut off by a closed gate rides on the gate's button
-  const sk=[];new Set([...skipped,...closed].filter(j=>open_(j)&&!pairOf(k).includes(j)).map(j=>pairOf(j)[0])).forEach(j=>{if(!isClosed(j)&&cutOff(j))return;sk.push(j)});
-  const skLabel=j=>{const deps=dependentsOf(j).filter(d=>!isClosed(d)&&pairOf(d).some(x=>skipped.has(x)&&open_(x))).map(d=>D.order[d].flight);return D.order[j].flight+(deps.length?' + '+deps.join(' + '):'')};
+  // closed arrays (one button each; an array cut off by a closed gate rides on the gate's button) and blocks left for later
+  const clA=[...closed].filter(a=>flightsOf(a).some(open_)).sort((x,y)=>numKey(x)-numKey(y));
+  const aLabel=a=>AL(a)+launchOf(a).flatMap(g=>dependentsOf(g)).filter(d=>!isClosed(d)&&pairOf(d).some(open_)).map(d=>' + '+D.order[d].flight).join('');
+  const later=[...new Set([...skipped].filter(j=>open_(j)&&!pairOf(k).includes(j)&&!isClosed(j)&&!cutOff(j)).map(j=>pairOf(j)[0]))];
+  const LA=launchArea(k),btnL=pick.mode==='return'?'Not flown':(LA&&!isClosed(k))?'Closed':'Later';
   next.innerHTML=`<div class="lab">Next up · #${k+1} of ${D.order.length}</div><div class="fl">${o.flight}${tag}</div>
    <div class="meta">${TN(t.id)} · ${acr(o).toFixed(0)} ac · ~${o.min} min${o.note?' · '+o.note:''}</div>${lines.map(l=>`<div class="meta">${l}</div>`).join('')}
    ${A?`<button id="nalt" class="skip" style="width:100%;margin-top:8px;border:1px solid ${useAlt?'#7c3aed':'var(--line)'};background:${useAlt?'#f3edfd':'#fff'};color:${useAlt?'#5b21b6':'var(--ink)'};border-radius:9px;padding:9px;font:inherit;font-size:13.5px;font-weight:600">${useAlt?'&#10003; Using alternate access':'Use alternate access'}</button>`:''}
-   <div class="btns"><a href="${useAlt?dir(launch.lat,launch.lon):dir((ent||[0,t.lat])[1],(ent||[t.lon])[0])}" target="_blank" rel="noopener">Directions${useAlt?' to parking':ent?' to gate':''}</a><button id="nskip" class="skip">${pick.mode==='return'?'Not flown':inOrder?'Later':'Closed'}</button><button id="ndone" class="done">Done &#10003;</button></div>
-   ${sk.length?`<div class="skips">Closed or waiting: ${sk.sort((a,b)=>a-b).map(j=>`<button data-fly="${j}">${skLabel(j)} · ${isClosed(j)?'Open':'Ready'}</button>`).join('')}</div>`:''}${backBtn()}`;
+   <div class="btns"><a href="${useAlt?dir(launch.lat,launch.lon):dir((ent||[0,t.lat])[1],(ent||[t.lon])[0])}" target="_blank" rel="noopener">Directions${useAlt?' to parking':ent?' to gate':''}</a><button id="nskip" class="skip">${btnL}</button><button id="ndone" class="done">Done &#10003;</button></div>
+   ${clA.length?`<div class="skips">Closed: ${clA.map(a=>`<button data-oa="${a}">${aLabel(a)} · Open</button>`).join('')}</div>`:''}${later.length?`<div class="skips">Later: ${later.sort((a,b)=>a-b).map(j=>`<button data-fly="${j}">${D.order[j].flight} · Ready</button>`).join('')}</div>`:''}${backBtn()}`;
   const sameTol=prevK!==null&&p.id===launch.id;
   legFit={path,t:launch,next:o.members,prev:(prevK!==null&&!sameTol)?D.order[prevK].members:[],sameTol};
   ndone.onclick=()=>{histSnap('Done on '+fl(k));markDone(k,true);if(useAlt)lastAlt=o.flight;save();refresh();fitLeg()};
-  nskip.onclick=()=>{if(pick.mode!=='return'&&!inOrder){histSnap('Closed on '+D.order[k].flight);closeFlight(k);fitLeg();return}
+  nskip.onclick=()=>{if(btnL==='Closed'){toggleArea(LA);fitLeg();return}
     histSnap((pick.mode==='return'?'Not flown on ':'Later on ')+D.order[k].flight);const pr=pairOf(k).filter(open_);
     if(pick.mode==='return'){const g=gateOf(k),grp=[...pr,...dependentsOf(k).filter(d=>skipped.has(d)).flatMap(d=>pairOf(d)),...(g>=0&&skipped.has(g)?pairOf(g):[])].filter(open_);
       grp.forEach(j=>{notflown.add(j);skipped.delete(j)})}
@@ -554,7 +576,8 @@ function renderNext(){document.querySelectorAll('.poly.next').forEach(p=>p.class
     save();refresh();fitLeg()};
   wireBack();
   const na=document.getElementById('nalt');if(na)na.onclick=()=>{histSnap((useAlt?'Alt access off on ':'Alt access on on ')+o.flight);setAlt(o.flight,!useAlt);renderList();fitLeg()};
-  next.querySelectorAll('[data-fly]').forEach(b=>b.onclick=()=>{const j=+b.dataset.fly;histSnap('Open on '+skLabel(j));if(isClosed(j))openFlight(j);else reinsert(j);fitLeg()});
+  next.querySelectorAll('[data-fly]').forEach(b=>b.onclick=()=>{const j=+b.dataset.fly;histSnap('Ready on '+D.order[j].flight);reinsert(j);fitLeg()});
+  next.querySelectorAll('[data-oa]').forEach(b=>b.onclick=()=>{toggleArea(b.dataset.oa);fitLeg()});
   const ring=el('circle',{cx:launch.x,cy:launch.y,r:1,class:'nextring'});gNext.appendChild(ring);
   let line=null,dot=null,xy=null,cum=null;
   if(path){xy=path.map(q=>P(q[0],q[1]));cum=[0];for(let i=1;i<xy.length;i++)cum.push(cum[i-1]+Math.hypot(xy[i][0]-xy[i-1][0],xy[i][1]-xy[i-1][1]));
