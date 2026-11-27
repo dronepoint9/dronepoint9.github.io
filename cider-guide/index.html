@@ -111,7 +111,9 @@ svg{width:100%;height:100%;display:block;user-select:none;-webkit-user-select:no
 .seg button.on{background:var(--ink);color:#fff;border-color:var(--ink)}
 .poly.skip{fill:rgba(232,150,20,.38)!important;stroke:#c77a0a!important;stroke-dasharray:5 3}
 .item.skipped{border-left:4px solid #e8960f}.item.nf{border-left:4px solid #b91c1c}
-.item .mk{border:1px solid var(--tol);background:#fff;color:var(--tol);border-radius:7px;padding:5px 8px;font:inherit;font-size:12.5px;font-weight:700}
+.item .mk,.item .sk{border:1px solid var(--tol);background:#fff;color:var(--tol);border-radius:7px;padding:5px 7px;font:inherit;font-size:12.5px;font-weight:700}
+.item .sk{border-color:#e8b45c;color:#7a4a00}.item .sk.op{background:#fff0d6}
+.item .acts{display:flex;gap:5px;flex:none}
 .tag{display:inline-block;font-size:11px;font-weight:700;border-radius:6px;padding:1px 6px;margin-left:6px;vertical-align:2px}
 .tag.sk{background:#fff0d6;color:#7a4a00}.tag.nf{background:#fde2e2;color:#8a1c1c}.tag.mv{background:#e3eafc;color:#1d3c99}
 #next .btns button.skip{color:#7a4a00;border-color:#e8b45c}
@@ -319,9 +321,16 @@ function reinsert(k){
   grp=[...new Set(grp)].sort((x,y)=>x-y);if(!grp.length)return;grp.forEach(j=>skipped.delete(j));
   plan=plan.filter(j=>!grp.includes(j));const rem=plan.filter(j=>open_(j)&&!skipped.has(j));
   const F=tolOf(grp[0]),Lt=tolOf(grp[grp.length-1]);let inner=0;for(let i=1;i<grp.length;i++)inner+=dTol(tolOf(grp[i-1]),tolOf(grp[i]));
-  let best=0,bc=Infinity;for(let i=0;i<=rem.length;i++){const a=i===0?curTol():tolOf(rem[i-1]),b=i<rem.length?tolOf(rem[i]):null;
-    const c=dTol(a,F)+inner+(b?dTol(Lt,b)-dTol(a,b):0);if(c<bc-0.5){bc=c;best=i}}
-  const at=best<rem.length?plan.indexOf(rem[best]):plan.length;plan.splice(at,0,...grp);
+  let at;
+  if(rem.some(j=>j<grp[0])){
+    // its normal turn has not come yet: put it back in its standard slot
+    const nx=rem.find(j=>j>grp[grp.length-1]);at=nx!==undefined?plan.indexOf(nx):plan.length;
+  }else{
+    // its turn has passed: slot it where it adds the least driving among the flights still to fly
+    let best=0,bc=Infinity;for(let i=0;i<=rem.length;i++){const a=i===0?curTol():tolOf(rem[i-1]),b=i<rem.length?tolOf(rem[i]):null;
+      const c=dTol(a,F)+inner+(b?dTol(Lt,b)-dTol(a,b):0);if(c<bc-0.5){bc=c;best=i}}
+    at=best<rem.length?plan.indexOf(rem[best]):plan.length}
+  plan.splice(at,0,...grp);
   grp.forEach(j=>tags[j]='reopened');save();renderList()}
 // deliberately fly a flight next (checklist Next button)
 function moveUp(k){const pr=pairOf(k).filter(open_);if(!pr.length)return;pr.forEach(j=>skipped.delete(j));
@@ -338,16 +347,22 @@ function refresh(){renderNext();const ad=areaDone();D.areas.forEach((a,i)=>shape
   ptxt.textContent=`${n} of ${D.order.length} flights · ${Math.round(ac).toLocaleString()} of ${Math.round(tot).toLocaleString()} ac${nsk?` · ${nsk} skipped`:''}${nnf?` · ${nnf} not flown`:''}`;
   document.querySelectorAll('.item').forEach(it=>{const on=it.dataset.n!==undefined?ad.has(it.dataset.n):done.has(+it.dataset.k);it.classList.toggle('done',on);it.querySelector('input').checked=on;
     const ks=it.dataset.n!==undefined?flightsOf(it.dataset.n):[+it.dataset.k];it.classList.toggle('skipped',!on&&ks.some(j=>skipped.has(j)&&!done.has(j)));it.classList.toggle('nf',!on&&ks.some(j=>notflown.has(j)));
-    const mk=it.querySelector('.mk');if(mk)mk.style.display=on?'none':''})}
+    const ac=it.querySelector('.acts');if(ac)ac.style.display=on||ks.every(j=>notflown.has(j))?'none':'';
+    const sb=it.querySelector('.sk');if(sb){const isSk=ks.some(j=>skipped.has(j)&&open_(j)),g=gateOf(ks[0]),blocked=isSk&&g>=0&&skipped.has(g)&&open_(g);
+      sb.textContent=isSk?'Open':'Skip';sb.classList.toggle('op',isSk);sb.disabled=blocked;sb.style.opacity=blocked?.45:1;sb.title=blocked?`Needs ${D.order[g].flight} open`:''}})}
 let sortMode='order';try{sortMode=localStorage.getItem('cider-sort')||'order'}catch(e){}
 const numKey=n=>n.startsWith('Array ')?parseFloat(n.slice(6))+(n.endsWith('E')?.5:0):({Offices:100,Substation:101,'West Laydown':102}[n]);
 const flightsOf=name=>D.order.map((o,k)=>[o,k]).filter(([o])=>o.members.includes(name)).map(([,k])=>k);
 function renderNum(){const L=D.areas.map(a=>a.name).sort((a,b)=>numKey(a)-numKey(b));
   items.innerHTML=L.map(n=>{const a=D.areas[idx[n]],t=tolById[a.tol],ks=flightsOf(n),o=D.order[ks[0]];
-   return `<div class="item" data-n="${n}"><input type="checkbox" aria-label="Done"><div class="num">${o?ks[0]+1:''}</div><div class="body"><div class="fl">${n.replace('Array ','')}${n.startsWith('Array')?'':''}</div><div class="meta">${a.acres} ac · ${TN(t.id)}${o&&o.members.length>1?' · in '+o.flight:''}</div></div>${o?`<button class="mk" data-mk="${ks[0]}">Next</button>`:''}<a href="${dir(t.lat,t.lon)}" target="_blank" rel="noopener">Go</a></div>`}).join('');refresh()}
+   return `<div class="item" data-n="${n}"><input type="checkbox" aria-label="Done"><div class="num">${o?ks[0]+1:''}</div><div class="body"><div class="fl">${n.replace('Array ','')}${n.startsWith('Array')?'':''}</div><div class="meta">${a.acres} ac · ${TN(t.id)}${o&&o.members.length>1?' · in '+o.flight:''}</div></div>${o?`<span class="acts"><button class="sk" data-sk="${ks[0]}">Skip</button><button class="mk" data-mk="${ks[0]}">Next</button></span>`:''}<a href="${dir(t.lat,t.lon)}" target="_blank" rel="noopener">Go</a></div>`}).join('');refresh()}
 function renderList(){document.querySelectorAll('#sortbar button').forEach(b=>b.classList.toggle('on',b.dataset.s===sortMode));if(sortMode==='num')return renderNum();items.innerHTML=plan.map(k=>{const o=D.order[k];const t=tolById[D.areas[idx[o.members[0]]].tol];
-  return `<div class="item" data-k="${k}"><input type="checkbox" aria-label="Done"><div class="num">${k+1}</div><div class="body"><div class="fl">${o.flight}</div><div class="meta">${TN(t.id)} · ${acr(o).toFixed(0)} ac · ~${o.min} min${o.note?' · '+o.note:''}</div></div><button class="mk" data-mk="${k}">Next</button><a href="${dir(t.lat,t.lon)}" target="_blank" rel="noopener">Go</a></div>`}).join('');refresh()}
+  return `<div class="item" data-k="${k}"><input type="checkbox" aria-label="Done"><div class="num">${k+1}</div><div class="body"><div class="fl">${o.flight}</div><div class="meta">${TN(t.id)} · ${acr(o).toFixed(0)} ac · ~${o.min} min${o.note?' · '+o.note:''}</div></div><span class="acts"><button class="sk" data-sk="${k}">Skip</button><button class="mk" data-mk="${k}">Next</button></span><a href="${dir(t.lat,t.lon)}" target="_blank" rel="noopener">Go</a></div>`}).join('');refresh()}
 items.addEventListener('click',e=>{const it=e.target.closest('.item');if(!it||e.target.closest('a'))return;const n=it.dataset.n,k=+it.dataset.k;
+  if(e.target.dataset.sk!==undefined){const j=+e.target.dataset.sk,pr=pairOf(j).filter(open_);if(!pr.length)return;
+    if(pr.some(x=>skipped.has(x))){snap('Open on '+D.order[j].flight);reinsert(j)}
+    else{snap('Skip on '+D.order[j].flight);const dep=dependentsOf(j).flatMap(d=>pairOf(d).filter(open_));[...pr,...dep].forEach(x=>{skipped.add(x);delete tags[x]});save();renderList()}
+    return}
   if(e.target.dataset.mk!==undefined){snap('Next on '+D.order[+e.target.dataset.mk].flight);moveUp(+e.target.dataset.mk);show('map');mapwrap.scrollIntoView({behavior:'smooth'});return}
   if(e.target.tagName==='INPUT'){snap((e.target.checked?'check on ':'uncheck on ')+(n!==undefined?n.replace('Array ',''):fl(k)));const ks=n!==undefined?flightsOf(n):[k];ks.forEach(j=>markDone(j,e.target.checked));save();refresh();return}
   show('map');selArea(n!==undefined?idx[n]:idx[D.order[k].members[0]],true);mapwrap.scrollIntoView({behavior:'smooth'})});
