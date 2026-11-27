@@ -109,6 +109,14 @@ svg{width:100%;height:100%;display:block;user-select:none;-webkit-user-select:no
 #edit textarea{width:100%;height:110px;font:12px ui-monospace,Menlo,monospace;margin-top:8px;border:1px solid var(--line);border-radius:8px;padding:6px;display:none}
 .seg{display:flex;gap:6px}.seg button{flex:1;border:1px solid var(--line);background:#fff;border-radius:8px;padding:8px;font:inherit;font-size:14px;font-weight:600;color:var(--ink)}
 .seg button.on{background:var(--ink);color:#fff;border-color:var(--ink)}
+.poly.skip{fill:rgba(232,150,20,.38)!important;stroke:#c77a0a!important;stroke-dasharray:5 3}
+.item.skipped{border-left:4px solid #e8960f}.item.nf{border-left:4px solid #b91c1c}
+.item .mk{border:1px solid var(--tol);background:#fff;color:var(--tol);border-radius:7px;padding:5px 8px;font:inherit;font-size:12.5px;font-weight:700}
+.tag{display:inline-block;font-size:11px;font-weight:700;border-radius:6px;padding:1px 6px;margin-left:6px;vertical-align:2px}
+.tag.sk{background:#fff0d6;color:#7a4a00}.tag.nf{background:#fde2e2;color:#8a1c1c}.tag.mv{background:#e3eafc;color:#1d3c99}
+#next .btns button.skip{color:#7a4a00;border-color:#e8b45c}
+.skips{margin-top:10px;padding-top:8px;border-top:1px solid #eee;font-size:13px;color:var(--muted)}
+.skips button{border:1px solid #e8b45c;background:#fff8ec;color:#7a4a00;border-radius:8px;padding:6px 10px;font:inherit;font-size:13px;font-weight:700;margin:4px 6px 0 0}
 footer{padding:6px 16px 28px;font-size:12px;color:var(--muted)}
 </style>
 </head>
@@ -143,6 +151,7 @@ footer{padding:6px 16px 28px;font-size:12px;color:var(--muted)}
     <span><i style="width:16px;height:0;border-top:2px dashed #1d4ed8;border-radius:0;vertical-align:3px"></i>Daisy chain</span>
     <span><i style="background:var(--supf);border:1.5px dashed var(--sup)"></i>Support area</span>
     <span><i style="background:rgba(120,120,120,.35);border:1.5px solid #8a8a8a"></i>Captured</span>
+    <span><i style="background:rgba(232,150,20,.38);border:1.5px dashed #c77a0a"></i>Skipped</span>
     <span><i style="background:var(--tol);border-radius:50%"></i>TOL</span>
     <span><i style="background:#b91c1c;border-radius:50%"></i>Base</span>
     <span><i style="background:#7c3aed;transform:rotate(45deg);width:10px;height:10px"></i>Entrance</span>
@@ -273,26 +282,45 @@ function selTol(id){clearSel();const t=tolById[id];tolEls[id-1].c.classList.add(
 // capture order list
 const KEY='cider-done-v1';let done=new Set();
 try{done=new Set(JSON.parse(localStorage.getItem(KEY)||'[]'))}catch(e){}
-const save=()=>{try{localStorage.setItem(KEY,JSON.stringify([...done]))}catch(e){}};
+// skip / not flown / moved-up / last flown, all saved on this phone
+const ld=(k,d)=>{try{const v=localStorage.getItem(k);return v===null?d:JSON.parse(v)}catch(e){return d}};
+let skipped=new Set(ld('cider-skip-v1',[])),notflown=new Set(ld('cider-nf-v1',[])),override=ld('cider-next-v1',null),last=ld('cider-last-v1',null);
+const save=()=>{try{localStorage.setItem(KEY,JSON.stringify([...done]));localStorage.setItem('cider-skip-v1',JSON.stringify([...skipped]));
+  localStorage.setItem('cider-nf-v1',JSON.stringify([...notflown]));localStorage.setItem('cider-next-v1',JSON.stringify(override));localStorage.setItem('cider-last-v1',JSON.stringify(last))}catch(e){}};
+// battery pairs: same flight name flown from the same TOL back to back (23, 18, 28)
+const pairOf=k=>{const out=[k];for(let j=k-1;j>=0&&D.order[j].flight===D.order[k].flight;j--)out.unshift(j);for(let j=k+1;j<D.order.length&&D.order[j].flight===D.order[k].flight;j++)out.push(j);return out};
+const open_=j=>!done.has(j)&&!notflown.has(j);
+function pickNext(){
+  if(override!==null&&open_(override))return{k:override,mode:'moved'};
+  let k=D.order.findIndex((o,j)=>open_(j)&&!skipped.has(j));if(k>=0)return{k,mode:''};
+  k=D.order.findIndex((o,j)=>open_(j));if(k>=0)return{k,mode:'return'};
+  return null}
+function markDone(k,on){if(on){done.add(k);skipped.delete(k);notflown.delete(k);last=k;if(override===k)override=null}else{done.delete(k);if(last===k)last=null}}
 const acr=o=>o.members.reduce((s,m)=>s+D.areas[idx[m]].acres,0);
 function areaDone(){const s=new Set();D.order.forEach((o,k)=>{const same=D.order.map((p,j)=>[p,j]).filter(([p])=>p.flight===o.flight);if(same.every(([,j])=>done.has(j)))o.members.forEach(m=>s.add(m))});return s}
 function refresh(){renderNext();const ad=areaDone();D.areas.forEach((a,i)=>shapes[i].pe.classList.toggle('done',ad.has(a.name)));
+  const sk=new Set();D.order.forEach((o,j)=>{if((skipped.has(j)||notflown.has(j))&&!done.has(j))o.members.forEach(m=>sk.add(m))});
+  D.areas.forEach((a,i)=>shapes[i].pe.classList.toggle('skip',sk.has(a.name)&&!ad.has(a.name)));
   const n=done.size,ac=[...ad].reduce((s,m)=>s+D.areas[idx[m]].acres,0),tot=D.areas.reduce((s,a)=>s+a.acres,0);
-  pfill.style.width=(n/D.order.length*100)+'%';ptxt.textContent=`${n} of ${D.order.length} flights · ${Math.round(ac).toLocaleString()} of ${Math.round(tot).toLocaleString()} ac`;
-  document.querySelectorAll('.item').forEach(it=>{const on=it.dataset.n!==undefined?ad.has(it.dataset.n):done.has(+it.dataset.k);it.classList.toggle('done',on);it.querySelector('input').checked=on})}
+  pfill.style.width=(n/D.order.length*100)+'%';const nsk=new Set([...skipped].filter(j=>!done.has(j)).map(j=>D.order[j].flight)).size,nnf=new Set([...notflown].map(j=>D.order[j].flight)).size;
+  ptxt.textContent=`${n} of ${D.order.length} flights · ${Math.round(ac).toLocaleString()} of ${Math.round(tot).toLocaleString()} ac${nsk?` · ${nsk} skipped`:''}${nnf?` · ${nnf} not flown`:''}`;
+  document.querySelectorAll('.item').forEach(it=>{const on=it.dataset.n!==undefined?ad.has(it.dataset.n):done.has(+it.dataset.k);it.classList.toggle('done',on);it.querySelector('input').checked=on;
+    const ks=it.dataset.n!==undefined?flightsOf(it.dataset.n):[+it.dataset.k];it.classList.toggle('skipped',!on&&ks.some(j=>skipped.has(j)&&!done.has(j)));it.classList.toggle('nf',!on&&ks.some(j=>notflown.has(j)));
+    const mk=it.querySelector('.mk');if(mk)mk.style.display=on?'none':''})}
 let sortMode='order';try{sortMode=localStorage.getItem('cider-sort')||'order'}catch(e){}
 const numKey=n=>n.startsWith('Array ')?parseFloat(n.slice(6))+(n.endsWith('E')?.5:0):({Offices:100,Substation:101,'West Laydown':102}[n]);
 const flightsOf=name=>D.order.map((o,k)=>[o,k]).filter(([o])=>o.members.includes(name)).map(([,k])=>k);
 function renderNum(){const L=D.areas.map(a=>a.name).sort((a,b)=>numKey(a)-numKey(b));
   items.innerHTML=L.map(n=>{const a=D.areas[idx[n]],t=tolById[a.tol],ks=flightsOf(n),o=D.order[ks[0]];
-   return `<div class="item" data-n="${n}"><input type="checkbox" aria-label="Done"><div class="num">${o?ks[0]+1:''}</div><div class="body"><div class="fl">${n.replace('Array ','')}${n.startsWith('Array')?'':''}</div><div class="meta">${a.acres} ac · ${TN(t.id)}${o&&o.members.length>1?' · in '+o.flight:''}</div></div><a href="${dir(t.lat,t.lon)}" target="_blank" rel="noopener">Go</a></div>`}).join('');refresh()}
+   return `<div class="item" data-n="${n}"><input type="checkbox" aria-label="Done"><div class="num">${o?ks[0]+1:''}</div><div class="body"><div class="fl">${n.replace('Array ','')}${n.startsWith('Array')?'':''}</div><div class="meta">${a.acres} ac · ${TN(t.id)}${o&&o.members.length>1?' · in '+o.flight:''}</div></div>${o?`<button class="mk" data-mk="${ks[0]}">Next</button>`:''}<a href="${dir(t.lat,t.lon)}" target="_blank" rel="noopener">Go</a></div>`}).join('');refresh()}
 function renderList(){document.querySelectorAll('#sortbar button').forEach(b=>b.classList.toggle('on',b.dataset.s===sortMode));if(sortMode==='num')return renderNum();items.innerHTML=D.order.map((o,k)=>{const t=tolById[D.areas[idx[o.members[0]]].tol];
-  return `<div class="item" data-k="${k}"><input type="checkbox" aria-label="Done"><div class="num">${k+1}</div><div class="body"><div class="fl">${o.flight}</div><div class="meta">${TN(t.id)} · ${acr(o).toFixed(0)} ac · ~${o.min} min${o.note?' · '+o.note:''}</div></div><a href="${dir(t.lat,t.lon)}" target="_blank" rel="noopener">Go</a></div>`}).join('');refresh()}
+  return `<div class="item" data-k="${k}"><input type="checkbox" aria-label="Done"><div class="num">${k+1}</div><div class="body"><div class="fl">${o.flight}</div><div class="meta">${TN(t.id)} · ${acr(o).toFixed(0)} ac · ~${o.min} min${o.note?' · '+o.note:''}</div></div><button class="mk" data-mk="${k}">Next</button><a href="${dir(t.lat,t.lon)}" target="_blank" rel="noopener">Go</a></div>`}).join('');refresh()}
 items.addEventListener('click',e=>{const it=e.target.closest('.item');if(!it||e.target.closest('a'))return;const n=it.dataset.n,k=+it.dataset.k;
-  if(e.target.tagName==='INPUT'){const ks=n!==undefined?flightsOf(n):[k];ks.forEach(j=>e.target.checked?done.add(j):done.delete(j));save();refresh();return}
+  if(e.target.dataset.mk!==undefined){flyNow(+e.target.dataset.mk);show('map');mapwrap.scrollIntoView({behavior:'smooth'});return}
+  if(e.target.tagName==='INPUT'){const ks=n!==undefined?flightsOf(n):[k];ks.forEach(j=>markDone(j,e.target.checked));save();refresh();return}
   show('map');selArea(n!==undefined?idx[n]:idx[D.order[k].members[0]],true);mapwrap.scrollIntoView({behavior:'smooth'})});
 sortbar.addEventListener('click',e=>{const b=e.target.closest('button');if(!b)return;sortMode=b.dataset.s;try{localStorage.setItem('cider-sort',sortMode)}catch(_){}renderList()});
-reset.onclick=()=>{if(reset.dataset.armed){done.clear();save();refresh();reset.textContent='Reset';delete reset.dataset.armed}else{reset.dataset.armed=1;reset.textContent='Tap again to clear';setTimeout(()=>{reset.textContent='Reset';delete reset.dataset.armed},3000)}};
+reset.onclick=()=>{if(reset.dataset.armed){done.clear();skipped.clear();notflown.clear();override=null;last=null;save();refresh();reset.textContent='Reset';delete reset.dataset.armed}else{reset.dataset.armed=1;reset.textContent='Tap again to clear';setTimeout(()=>{reset.textContent='Reset';delete reset.dataset.armed},3000)}};
 function show(v){mapview.style.display=v==='map'?'block':'none';list.style.display=v==='list'?'block':'none';tMap.classList.toggle('on',v==='map');tList.classList.toggle('on',v==='list');if(v==='map')apply()}
 tMap.onclick=()=>show('map');tList.onclick=()=>show('list');
 
@@ -383,26 +411,50 @@ function drawEnt(s){s=s||vb[2]/svg.getBoundingClientRect().width;gEnt.innerHTML=
   D.tols.forEach(t=>{const e=getEnt(t.id);if(!e)return;const[x,y]=P(e[0],e[1]);
     gEnt.appendChild(el('rect',{x:x-h,y:y-h,width:2*h,height:2*h,class:'ent',transform:`rotate(45 ${x} ${y})`}))})}
 
+function flyNow(k){const pr=pairOf(k).filter(open_);pr.forEach(j=>skipped.delete(j));override=pr.length?pr[0]:k;save();refresh();fitLeg()}
+// road network from every traced leg; shared road points are identical after cleanup, so legs join where roads meet
+let graph=null;
+function buildGraph(){const G=new Map(),C=new Map(),key=q=>q[0].toFixed(5)+','+q[1].toFixed(5);
+  const add=(a,b)=>{const ka=key(a),kb=key(b);if(ka===kb)return;C.set(ka,a);C.set(kb,b);const w=hav(a,b);if(!G.has(ka))G.set(ka,new Map());if(!G.has(kb))G.set(kb,new Map());G.get(ka).set(kb,w);G.get(kb).set(ka,w)};
+  LEGS.forEach(l=>{const r=getRoute(l.key);if(!r)return;const P=[[l.from.lon,l.from.lat],...r,[l.to.lon,l.to.lat]];for(let i=0;i<P.length-1;i++)add(P[i],P[i+1])});
+  graph={G,C,key};return graph}
+function routeBetween(a,b){
+  const f=getRoute(a.id+'>'+b.id);if(f)return{pts:f,direct:true};
+  const r=getRoute(b.id+'>'+a.id);if(r)return{pts:[...r].reverse(),direct:true};
+  const g=graph||buildGraph(),s=g.key([a.lon,a.lat]),e=g.key([b.lon,b.lat]);if(!g.G.has(s)||!g.G.has(e))return null;
+  const dist=new Map([[s,0]]),prev=new Map(),todo=new Set([s]);
+  while(todo.size){let u=null,du=Infinity;todo.forEach(x=>{const dx=dist.get(x);if(dx<du){du=dx;u=x}});todo.delete(u);if(u===e)break;
+    g.G.get(u).forEach((w,v)=>{const nd=du+w;if(nd<(dist.has(v)?dist.get(v):Infinity)){dist.set(v,nd);prev.set(v,u);todo.add(v)}})}
+  if(!prev.has(e))return null;const out=[];let x=prev.get(e);while(x&&x!==s){out.unshift(g.C.get(x));x=prev.get(x)}
+  return{pts:out,direct:false}}
 function renderNext(){document.querySelectorAll('.poly.next').forEach(p=>p.classList.remove('next'));gNext.innerHTML='';nextAnim=null;
   if(editOn){next.style.display='none';return}next.style.display='';
-  const k=D.order.findIndex((o,j)=>!done.has(j));
-  if(k<0){legFit=null;next.innerHTML='<div class="lab">Capture complete</div><div class="fl">All flights done</div><div class="meta">Use Reset on the Checklist to start next week.</div>';return}
+  const pick=pickNext();
+  if(!pick){legFit=null;const nf=[...new Set([...notflown].map(j=>D.order[j].flight))];
+    next.innerHTML=`<div class="lab">Capture complete</div><div class="fl">All flights done</div>${nf.length?`<div class="meta">Not flown today: ${nf.join(', ')}</div>`:''}<div class="meta">Use Reset on the Checklist to start next week.</div>`;return}
+  const k=pick.k;
   const o=D.order[k],t=tolOf(k);o.members.forEach(m=>shapes[idx[m]].pe.classList.add('next'));
-  const p=k>0?tolOf(k-1):D.tols.find(x=>x.base),route=p&&p.id!==t.id?getRoute(p.id+'>'+t.id):null;
+  const prevK=(last!==null&&done.has(last))?last:null,p=prevK!==null?tolOf(prevK):D.tols.find(x=>x.base);
+  const rt=p.id!==t.id?routeBetween(p,t):null,route=rt&&rt.pts;
   let path=null,lines=[];
-  if(route){path=[[p.lon,p.lat],...route,[t.lon,t.lat]];lines.push(`${distTxt(pathLen(path))} along the traced route from the ${TN(p.id)}`);
+  if(route){path=[[p.lon,p.lat],...route,[t.lon,t.lat]];lines.push(`${distTxt(pathLen(path))} along ${rt.direct?'the traced route':'traced roads'} from the ${TN(p.id)}`);
     if(me)lines.push(`${distTxt(hav([me.lon,me.lat],[t.lon,t.lat]))} straight-line from you`)}
   else if(me){path=[[me.lon,me.lat],[t.lon,t.lat]];lines.push(`${distTxt(hav(path[0],path[1]))} straight-line from you`)}
-  else if(p&&p.id!==t.id){path=[[p.lon,p.lat],[t.lon,t.lat]];lines.push(`${distTxt(hav(path[0],path[1]))} straight-line from the ${TN(p.id)}`)}
-  else lines.push(k>0?'Same TOL as the last flight':'First flight of the day');
+  else if(p.id!==t.id){path=[[p.lon,p.lat],[t.lon,t.lat]];lines.push(`${distTxt(hav(path[0],path[1]))} straight-line from the ${TN(p.id)}`)}
+  else lines.push(prevK!==null?'Same TOL as the last flight':'First flight of the day');
   const ent=getEnt(t.id);if(ent)lines.push('Entrance marked on the map');
-  next.innerHTML=`<div class="lab">Next up · #${k+1} of ${D.order.length}</div><div class="fl">${o.flight}</div>
+  const tag=pick.mode==='moved'?'<span class="tag mv">Moved up</span>':pick.mode==='return'?'<span class="tag sk">Skipped earlier</span>':'';
+  const sk=[];new Set([...skipped].filter(j=>open_(j)&&j!==k).map(j=>pairOf(j)[0])).forEach(j=>sk.push(j));
+  next.innerHTML=`<div class="lab">Next up · #${k+1} of ${D.order.length}</div><div class="fl">${o.flight}${tag}</div>
    <div class="meta">${TN(t.id)} · ${acr(o).toFixed(0)} ac · ~${o.min} min${o.note?' · '+o.note:''}</div>${lines.map(l=>`<div class="meta">${l}</div>`).join('')}
-   <div class="btns"><a href="${dir((ent||[0,t.lat])[1],(ent||[t.lon])[0])}" target="_blank" rel="noopener">Directions${ent?' to gate':''}</a><button id="nshow">Show</button><button id="ndone" class="done">Done &#10003;</button></div>`;
-  const sameTol=k>0&&p.id===t.id;
-  legFit={path,t,next:o.members,prev:(k>0&&!sameTol)?D.order[k-1].members:[],sameTol};
+   <div class="btns"><a href="${dir((ent||[0,t.lat])[1],(ent||[t.lon])[0])}" target="_blank" rel="noopener">Directions${ent?' to gate':''}</a><button id="nshow">Show</button><button id="nskip" class="skip">${pick.mode==='return'?'Not flown':'Skip'}</button><button id="ndone" class="done">Done &#10003;</button></div>
+   ${sk.length?`<div class="skips">Skipped: ${sk.sort((a,b)=>a-b).map(j=>`<button data-fly="${j}">${D.order[j].flight} · Fly now</button>`).join('')}</div>`:''}`;
+  const sameTol=prevK!==null&&p.id===t.id;
+  legFit={path,t,next:o.members,prev:(prevK!==null&&!sameTol)?D.order[prevK].members:[],sameTol};
   nshow.onclick=fitLeg;
-  ndone.onclick=()=>{done.add(k);save();refresh();fitLeg()};
+  ndone.onclick=()=>{markDone(k,true);save();refresh();fitLeg()};
+  nskip.onclick=()=>{const pr=pairOf(k).filter(open_);if(pick.mode==='return'){pr.forEach(j=>{notflown.add(j);skipped.delete(j)})}else pr.forEach(j=>skipped.add(j));if(pr.includes(override))override=null;save();refresh();fitLeg()};
+  next.querySelectorAll('[data-fly]').forEach(b=>b.onclick=()=>flyNow(+b.dataset.fly));
   const ring=el('circle',{cx:t.x,cy:t.y,r:1,class:'nextring'});gNext.appendChild(ring);
   let line=null,dot=null,xy=null,cum=null;
   if(path){xy=path.map(q=>P(q[0],q[1]));cum=[0];for(let i=1;i<xy.length;i++)cum.push(cum[i-1]+Math.hypot(xy[i][0]-xy[i-1][0],xy[i][1]-xy[i-1][1]));
@@ -444,16 +496,16 @@ function drawEdit(s){s=s||vb[2]/svg.getBoundingClientRect().width;gEdit.innerHTM
   else{const t=tolById[+esel.value];if(t)gEdit.appendChild(el('circle',{cx:t.x,cy:t.y,r:16*s,class:'ering'}))}}
 function editTap(lon,lat){const p=[+lon.toFixed(6),+lat.toFixed(6)];
   if(emodeV==='route'){EDITS.routes[esel.value]=[...curRoute(),p]}else{EDITS.entrances[esel.value]=p}
-  saveEdits();fillSel(true);drawEdit();drawEnt();eout.style.display='none'}
+  saveEdits();graph=null;fillSel(true);drawEdit();drawEnt();eout.style.display='none'}
 bedit.onclick=()=>{editOn=!editOn;bedit.classList.toggle('on',editOn);edit.style.display=editOn?'block':'none';
   if(editOn){if(!showImg){showImg=true;tiles()}fillSel();focusSel();mapwrap.scrollIntoView({behavior:'smooth',block:'start'})}
   drawEdit();renderNext()};
 eexit.onclick=()=>bedit.onclick();
 emode.addEventListener('click',e=>{const b=e.target.closest('button');if(!b)return;emodeV=b.dataset.m;emode.querySelectorAll('button').forEach(x=>x.classList.toggle('on',x===b));fillSel();focusSel();drawEdit()});
 esel.onchange=()=>{focusSel();drawEdit()};
-eundo.onclick=()=>{if(emodeV==='route'){const r=curRoute().slice(0,-1);EDITS.routes[esel.value]=r.length?r:null}else EDITS.entrances[esel.value]=null;saveEdits();fillSel(true);drawEdit();drawEnt()};
+eundo.onclick=()=>{graph=null;if(emodeV==='route'){const r=curRoute().slice(0,-1);EDITS.routes[esel.value]=r.length?r:null}else EDITS.entrances[esel.value]=null;saveEdits();fillSel(true);drawEdit();drawEnt()};
 eclear.onclick=()=>{if(!eclear.dataset.armed){eclear.dataset.armed=1;eclear.textContent='Tap to confirm';setTimeout(()=>{eclear.textContent='Clear';delete eclear.dataset.armed},3000);return}
-  delete eclear.dataset.armed;eclear.textContent='Clear';if(emodeV==='route')EDITS.routes[esel.value]=null;else EDITS.entrances[esel.value]=null;saveEdits();fillSel(true);drawEdit();drawEnt()};
+  delete eclear.dataset.armed;eclear.textContent='Clear';graph=null;if(emodeV==='route')EDITS.routes[esel.value]=null;else EDITS.entrances[esel.value]=null;saveEdits();fillSel(true);drawEdit();drawEnt()};
 ecopy.onclick=async()=>{const out={entrances:{},routes:{}};
   D.tols.forEach(t=>{const e=getEnt(t.id);if(e)out.entrances[t.id]=e});LEGS.forEach(l=>{const r=getRoute(l.key);if(r)out.routes[l.key]=r});
   const txt='Cider guide edits v1\n'+JSON.stringify(out);eout.value=txt;
