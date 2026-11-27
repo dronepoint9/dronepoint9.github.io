@@ -219,10 +219,12 @@ D.chains.forEach(c=>{const t=tolById[c.tol];const pts=[[t.x,t.y],...c.members.ma
 const pad=150*K;minx-=pad;miny-=pad;maxx+=pad;maxy+=pad;
 let vb=[minx,miny,maxx-minx,maxy-miny];
 // keep fitted content clear of the button column on the right edge of the map
+const mapW=()=>svg.getBoundingClientRect().width;let pendingFit=null;
+const vbOk=v=>Array.isArray(v)&&v.length===4&&v.every(Number.isFinite)&&v[2]>0&&v[3]>0;
 function padR(b){const r=svg.getBoundingClientRect(),cw=document.querySelector('.ctrl').offsetWidth+14,f=cw/Math.max(r.width-cw,1);return[b[0],b[1],b[2]*(1+f),b[3]]}
-function fit(b){b=padR(b);const r=svg.getBoundingClientRect(),asp=r.width/r.height;let[x,y,w,h]=b;
+function fit(b){if(!mapW()){pendingFit=b;return}b=padR(b);const r=svg.getBoundingClientRect(),asp=r.width/r.height;let[x,y,w,h]=b;
   if(w/h<asp){const nw=h*asp;x-=(nw-w)/2;w=nw}else{const nh=w/asp;y-=(nh-h)/2;h=nh}vb=[x,y,w,h];apply()}
-function apply(){svg.setAttribute('viewBox',vb.join(' '));
+function apply(){if(!mapW())return;if(!vbOk(vb))vb=[minx,miny,maxx-minx,maxy-miny];svg.setAttribute('viewBox',vb.join(' '));
   const r=svg.getBoundingClientRect(),s=vb[2]/r.width,g=s/K; // map units per px, ground meters per px
   const fs=(g>14?10:g>7?11.5:13)*s,tr=(g>14?6:g>7?9:11)*s;
   sizeMe(s);scheduleTiles();drawEnt(s);if(editOn)drawEdit(s);
@@ -233,7 +235,7 @@ function apply(){svg.setAttribute('viewBox',vb.join(' '));
 // pan / pinch
 const pts=new Map();let moved=0,startVB,start;
 function toSvg(cx,cy){const r=svg.getBoundingClientRect();return[vb[0]+(cx-r.left)/r.width*vb[2],vb[1]+(cy-r.top)/r.height*vb[3]]}
-function zoomAt(f,cx,cy){const[px,py]=toSvg(cx,cy);vb=[px-(px-vb[0])*f,py-(py-vb[1])*f,vb[2]*f,vb[3]*f];apply()}
+function zoomAt(f,cx,cy){if(!mapW())return;const[px,py]=toSvg(cx,cy);vb=[px-(px-vb[0])*f,py-(py-vb[1])*f,vb[2]*f,vb[3]*f];apply()}
 svg.addEventListener('pointerdown',e=>{svg.setPointerCapture(e.pointerId);pts.set(e.pointerId,[e.clientX,e.clientY]);moved=0;startVB=[...vb];start=snap()});
 function snap(){const v=[...pts.values()];if(v.length===1)return{c:v[0]};const c=[(v[0][0]+v[1][0])/2,(v[0][1]+v[1][1])/2],d=Math.hypot(v[0][0]-v[1][0],v[0][1]-v[1][1]);return{c,d}}
 svg.addEventListener('pointermove',e=>{if(!pts.has(e.pointerId))return;pts.set(e.pointerId,[e.clientX,e.clientY]);
@@ -380,12 +382,12 @@ items.addEventListener('click',e=>{const it=e.target.closest('.item');if(!it||e.
   show('map');selArea(n!==undefined?idx[n]:idx[D.order[k].members[0]],true);mapwrap.scrollIntoView({behavior:'smooth'})});
 sortbar.addEventListener('click',e=>{const b=e.target.closest('button');if(!b)return;sortMode=b.dataset.s;try{localStorage.setItem('cider-sort',sortMode)}catch(_){}renderList()});
 reset.onclick=()=>{if(reset.dataset.armed){altMan={};try{localStorage.setItem('cider-altman-v1','{}')}catch(e){}hist=[];try{localStorage.setItem('cider-hist-v1','[]')}catch(e){}done.clear();skipped.clear();notflown.clear();last=null;plan=D.order.map((o,j)=>j);tags={};save();refresh();reset.textContent='Reset';delete reset.dataset.armed}else{reset.dataset.armed=1;reset.textContent='Tap again to clear';setTimeout(()=>{reset.textContent='Reset';delete reset.dataset.armed},3000)}};
-function show(v){mapview.style.display=v==='map'?'block':'none';list.style.display=v==='list'?'block':'none';tMap.classList.toggle('on',v==='map');tList.classList.toggle('on',v==='list');if(v==='map')apply()}
+function show(v){mapview.style.display=v==='map'?'block':'none';list.style.display=v==='list'?'block':'none';tMap.classList.toggle('on',v==='map');tList.classList.toggle('on',v==='list');if(v==='map'){if(pendingFit){const b=pendingFit;pendingFit=null;fit(b)}else apply()}}
 tMap.onclick=()=>show('map');tList.onclick=()=>show('list');
 
 // ---- fly animation
 let flyRaf;
-function flyTo(b){b=padR(b);const r=svg.getBoundingClientRect(),asp=r.width/r.height;let[x,y,w,h]=b;
+function flyTo(b){if(!mapW()){pendingFit=b;return}b=padR(b);const r=svg.getBoundingClientRect(),asp=r.width/r.height;let[x,y,w,h]=b;
   if(w/h<asp){const nw=h*asp;x-=(nw-w)/2;w=nw}else{const nh=w/asp;y-=(nh-h)/2;h=nh}
   const a=[...vb],z=[x,y,w,h],t0=performance.now(),D=650;cancelAnimationFrame(flyRaf);
   const step=now=>{let p=Math.min(1,(now-t0)/D);p=p<.5?2*p*p:1-Math.pow(-2*p+2,2)/2;vb=a.map((v,i)=>v+(z[i]-v)*p);apply();if(p<1)flyRaf=requestAnimationFrame(step)};
@@ -397,7 +399,7 @@ const O=20037508.342789244,RES0=2*O/256;
 let showImg=true;try{showImg=localStorage.getItem('cider-img')!=='0'}catch(e){}
 const layers={};let tileRaf;
 function scheduleTiles(){cancelAnimationFrame(tileRaf);tileRaf=requestAnimationFrame(tiles)}
-function tiles(){gTile.style.display=showImg?'':'none';attrib.style.display=showImg?'':'none';bimg.classList.toggle('on',showImg);if(!showImg)return;
+function tiles(){if(!mapW())return;gTile.style.display=showImg?'':'none';attrib.style.display=showImg?'':'none';bimg.classList.toggle('on',showImg);if(!showImg)return;
   const r=svg.getBoundingClientRect(),s=vb[2]/r.width,dpr=Math.min(window.devicePixelRatio||1,2);
   let z=Math.max(12,Math.min(19,Math.ceil(Math.log2(RES0*dpr/s)))),res,x0,x1,y0,y1;
   for(;;){res=RES0/2**z;const T=256*res;x0=Math.floor((vb[0]+O)/T);x1=Math.floor((vb[0]+vb[2]+O)/T);y0=Math.floor((vb[1]+O)/T);y1=Math.floor((vb[1]+vb[3]+O)/T);
@@ -459,7 +461,7 @@ let EDITS={entrances:{},routes:{},alts:{}};try{EDITS=Object.assign(EDITS,JSON.pa
 // drop local edits that are already built into the page, so later baked fixes are not shadowed.
 // When the baked set is updated (BAKED_V bump), every local entry the bake covers is dropped.
 const BAKED_V='5';let bv=null;try{bv=localStorage.getItem('cider-baked-v')}catch(e){}
-EDITS.alts=EDITS.alts||{};for(const g of ['entrances','routes','alts'])for(const k in EDITS[g])if((bv!==BAKED_V&&k in (BAKED[g]||{}))||JSON.stringify(EDITS[g][k])===JSON.stringify(BAKED[g][k]))delete EDITS[g][k];
+EDITS.alts=EDITS.alts||{};BAKED.alts=BAKED.alts||{};for(const g of ['entrances','routes','alts'])for(const k in EDITS[g])if((bv!==BAKED_V&&k in (BAKED[g]||{}))||JSON.stringify(EDITS[g][k])===JSON.stringify((BAKED[g]||{})[k]))delete EDITS[g][k];
 try{localStorage.setItem('cider-baked-v',BAKED_V)}catch(e){}
 try{localStorage.setItem('cider-edits-v1',JSON.stringify(EDITS))}catch(e){}
 const saveEdits=()=>{try{localStorage.setItem('cider-edits-v1',JSON.stringify(EDITS))}catch(e){}};
@@ -535,7 +537,7 @@ function renderNext(){document.querySelectorAll('.poly.next').forEach(p=>p.class
     line=el('polyline',{points:xy.map(q=>q.join(',')).join(' '),class:'nextln','stroke-linejoin':'round'});dot=el('circle',{cx:xy[0][0],cy:xy[0][1],r:1,class:'nextdot'});gNext.appendChild(line);gNext.appendChild(dot)}
   nextAnim={ring,line,dot,xy,cum,L:path?pathLen(path):0,t0:performance.now()};cancelAnimationFrame(nextRaf);nextRaf=requestAnimationFrame(animNext)}
 const DOT_MPS=940,DOT_PAUSE=0.8; // set so the 2.92 mi 14+13 to 6 leg runs in 5 s
-function animNext(now){const a=nextAnim;if(!a)return;const s=vb[2]/svg.getBoundingClientRect().width,e=(now-a.t0)/1000;
+function animNext(now){const a=nextAnim;if(!a)return;if(!mapW()||document.hidden){nextRaf=requestAnimationFrame(animNext);return}const s=vb[2]/svg.getBoundingClientRect().width,e=(now-a.t0)/1000;
   const ph=(e%1.6)/1.6;a.ring.setAttribute('r',(10+18*ph)*s);a.ring.style.opacity=1-ph;
   if(a.line){a.line.style.strokeDasharray=`${9*s} ${7*s}`;a.line.style.strokeDashoffset=-(e*32*s)%(16*s);
     // constant ground speed on every leg (DOT_MPS meters per second), then a short pause at the TOL
