@@ -125,7 +125,7 @@ footer{padding:6px 16px 28px;font-size:12px;color:var(--muted)}
   <div id="mapwrap">
     <svg id="svg"><g id="gTile"></g><g id="gPoly"></g><g id="gChain"></g><g id="gLink"></g><g id="gNext"></g><g id="gEnt"></g><g id="gEdit"></g><g id="gTol"></g><g id="gLbl"></g><g id="gMe"></g></svg>
     <div id="attrib">Imagery: NYS ITS Geospatial Services, Spring 2023</div><div id="geomsg"></div>
-    <div class="ctrl"><button id="zin" aria-label="Zoom in">+</button><button id="zout" aria-label="Zoom out">&minus;</button><button id="zfit" aria-label="Fit site" style="font-size:13px">Fit</button><button id="bgps" class="sm" aria-label="Show my location">GPS</button><button id="bimg" class="sm" aria-label="Aerial imagery">Aerial</button><button id="bedit" class="sm" aria-label="Edit routes and entrances">Edit</button></div>
+    <div class="ctrl"><button id="zin" aria-label="Zoom in">+</button><button id="zout" aria-label="Zoom out">&minus;</button><button id="zfit" class="sm" aria-label="Show whole site">Site</button><button id="bleg" class="sm" aria-label="Show next leg">Leg</button><button id="bgps" class="sm" aria-label="Show my location">GPS</button><button id="bimg" class="sm" aria-label="Aerial imagery">Aerial</button><button id="bedit" class="sm" aria-label="Edit routes and entrances">Edit</button></div>
   </div>
   <div id="next"></div>
   <div id="edit">
@@ -204,7 +204,9 @@ D.chains.forEach(c=>{const t=tolById[c.tol];const pts=[[t.x,t.y],...c.members.ma
   for(let j=0;j<pts.length-1;j++){const[x1,y1]=pts[j],[x2,y2]=pts[j+1];const g=el('path',{class:'chainar','data-x':(x1+x2)/2,'data-y':(y1+y2)/2,'data-a':Math.atan2(y2-y1,x2-x1)*180/Math.PI});gChain.appendChild(g)}});
 const pad=150*K;minx-=pad;miny-=pad;maxx+=pad;maxy+=pad;
 let vb=[minx,miny,maxx-minx,maxy-miny];
-function fit(b){const r=svg.getBoundingClientRect(),asp=r.width/r.height;let[x,y,w,h]=b;
+// keep fitted content clear of the button column on the right edge of the map
+function padR(b){const r=svg.getBoundingClientRect(),cw=document.querySelector('.ctrl').offsetWidth+14,f=cw/Math.max(r.width-cw,1);return[b[0],b[1],b[2]*(1+f),b[3]]}
+function fit(b){b=padR(b);const r=svg.getBoundingClientRect(),asp=r.width/r.height;let[x,y,w,h]=b;
   if(w/h<asp){const nw=h*asp;x-=(nw-w)/2;w=nw}else{const nh=w/asp;y-=(nh-h)/2;h=nh}vb=[x,y,w,h];apply()}
 function apply(){svg.setAttribute('viewBox',vb.join(' '));
   const r=svg.getBoundingClientRect(),s=vb[2]/r.width,g=s/K; // map units per px, ground meters per px
@@ -236,7 +238,7 @@ function up(e){const wasTap=pts.size===1&&moved<4;pts.delete(e.pointerId);start=
 svg.addEventListener('pointerup',up);svg.addEventListener('pointercancel',e=>{pts.delete(e.pointerId);start=null});
 svg.addEventListener('wheel',e=>{e.preventDefault();zoomAt(e.deltaY>0?1.2:1/1.2,e.clientX,e.clientY)},{passive:false});
 const ctr=()=>{const r=svg.getBoundingClientRect();return[r.left+r.width/2,r.top+r.height/2]};
-zin.onclick=()=>zoomAt(1/1.5,...ctr());zout.onclick=()=>zoomAt(1.5,...ctr());zfit.onclick=()=>fit([minx,miny,maxx-minx,maxy-miny]);
+zin.onclick=()=>zoomAt(1/1.5,...ctr());zout.onclick=()=>zoomAt(1.5,...ctr());zfit.onclick=()=>flyTo([minx,miny,maxx-minx,maxy-miny]);
 
 // selection
 function clearSel(){document.querySelectorAll('.sel').forEach(e=>e.classList.remove('sel'));gK.innerHTML=''}
@@ -296,7 +298,7 @@ tMap.onclick=()=>show('map');tList.onclick=()=>show('list');
 
 // ---- fly animation
 let flyRaf;
-function flyTo(b){const r=svg.getBoundingClientRect(),asp=r.width/r.height;let[x,y,w,h]=b;
+function flyTo(b){b=padR(b);const r=svg.getBoundingClientRect(),asp=r.width/r.height;let[x,y,w,h]=b;
   if(w/h<asp){const nw=h*asp;x-=(nw-w)/2;w=nw}else{const nh=w/asp;y-=(nh-h)/2;h=nh}
   const a=[...vb],z=[x,y,w,h],t0=performance.now(),D=650;cancelAnimationFrame(flyRaf);
   const step=now=>{let p=Math.min(1,(now-t0)/D);p=p<.5?2*p*p:1-Math.pow(-2*p+2,2)/2;vb=a.map((v,i)=>v+(z[i]-v)*p);apply();if(p<1)flyRaf=requestAnimationFrame(step)};
@@ -322,6 +324,7 @@ function tiles(){gTile.style.display=showImg?'':'none';attrib.style.display=show
     im.setAttribute('href',TILE+z+'/'+y+'/'+x);im.addEventListener('error',()=>{im.remove()});g._t[key]=im;g.appendChild(im)}
   const n=Object.keys(g._t).length;if(n>500){for(const key in g._t){const[x,y]=key.split('/').map(Number);if(x<x0||x>x1||y<y0||y>y1){g._t[key].remove();delete g._t[key]}}}
 }
+bleg.onclick=()=>fitLeg();
 bimg.onclick=()=>{showImg=!showImg;try{localStorage.setItem('cider-img',showImg?'1':'0')}catch(e){}tiles()};
 
 // ---- save imagery for offline (z13-17 over the site); the service worker caches each tile
@@ -355,7 +358,12 @@ bgps.onclick=()=>{if(!navigator.geolocation){geomsgShow('Location is not availab
 const hav=(a,b)=>{const r=Math.PI/180,dl=(b[1]-a[1])*r,dn=(b[0]-a[0])*r,h=Math.sin(dl/2)**2+Math.cos(a[1]*r)*Math.cos(b[1]*r)*Math.sin(dn/2)**2;return 2*6371000*Math.asin(Math.sqrt(h))};
 const distTxt=m=>{const ft=m*3.28084;return ft<1000?`${Math.round(ft/10)*10} ft`:`${(ft/5280).toFixed(1)} mi`};
 const tolOf=k=>tolById[D.areas[idx[D.order[k].members[0]]].tol];
-let nextAnim=null,nextRaf;
+let nextAnim=null,nextRaf,legFit=null;
+function fitLeg(){if(!legFit){flyTo([minx,miny,maxx-minx,maxy-miny]);return}
+  const L=legFit,pts=[...(L.path||[]),[L.t.lon,L.t.lat]];if(me)pts.push([me.lon,me.lat]);
+  if(pts.length<2){selArea(L.area,true);return}
+  const xy=pts.map(q=>P(q[0],q[1])),xs=xy.map(q=>q[0]),ys=xy.map(q=>q[1]),m=150*K,x0=Math.min(...xs),x1=Math.max(...xs),y0=Math.min(...ys),y1=Math.max(...ys);
+  flyTo([x0-m,y0-m,Math.max(x1-x0,300*K)+2*m,Math.max(y1-y0,300*K)+2*m])}
 // ---- traced routes and entrances: baked data plus this phone's edits
 const BAKED={"entrances":{"1":[-78.191876,43.097289],"2":[-78.216988,43.09036],"3":[-78.206056,43.099129],"4":[-78.216924,43.092454],"5":[-78.216519,43.082052],"6":[-78.217632,43.097014],"7":[-78.236073,43.098361],"8":[-78.247036,43.095057],"9":[-78.247154,43.089376],"10":[-78.256491,43.096586],"11":[-78.276564,43.096393],"12":[-78.270795,43.096598],"13":[-78.236074,43.098347],"14":[-78.270791,43.096571],"15":[-78.212646,43.107711],"16":[-78.212728,43.104453],"17":[-78.184333,43.096823],"18":[-78.156204,43.092832],"19":[-78.165502,43.099798],"20":[-78.246601,43.107642],"21":[-78.276554,43.096411],"22":[-78.192775,43.112164],"23":[-78.17734,43.108683]},"routes":{"1>4":[[-78.191876,43.097289],[-78.19217,43.099337],[-78.206056,43.099129],[-78.212489,43.098941],[-78.217636,43.098841],[-78.217632,43.097014],[-78.216924,43.092454]],"4>2":[[-78.216924,43.092454],[-78.216988,43.09036]],"2>5":[[-78.216988,43.09036]],"5>6":[[-78.217632,43.097014]],"6>7":[[-78.217632,43.097014],[-78.217633,43.098816],[-78.235826,43.098399],[-78.236074,43.098347],[-78.235826,43.098399],[-78.235822,43.101067],[-78.232199,43.101442]],"13>8":[[-78.235822,43.101067],[-78.235826,43.098399],[-78.236074,43.098347],[-78.247417,43.098118],[-78.247036,43.095057],[-78.245987,43.094954],[-78.245654,43.095747]],"8>9":[[-78.245654,43.095747],[-78.245987,43.094954],[-78.247036,43.095057]],"9>20":[[-78.247413,43.098118],[-78.246867,43.107077]],"20>14":[[-78.246867,43.107077],[-78.247413,43.098118],[-78.250952,43.098032],[-78.25317,43.096967],[-78.254578,43.096675],[-78.256491,43.096586],[-78.270791,43.096571],[-78.270821,43.09722],[-78.269355,43.097377],[-78.269001,43.10173],[-78.270888,43.101683],[-78.271163,43.103276],[-78.266611,43.103724],[-78.266498,43.105657]],"14>12":[[-78.266498,43.105657],[-78.266611,43.103724],[-78.271163,43.103276],[-78.270888,43.101683]],"12>11":[[-78.269001,43.10173],[-78.269355,43.097377],[-78.270821,43.09722],[-78.270791,43.096571],[-78.276554,43.096411],[-78.276586,43.095923],[-78.275691,43.095979],[-78.275462,43.093282],[-78.271688,43.092992]],"11>21":[[-78.271688,43.092992],[-78.275462,43.093282],[-78.275617,43.09515]],"21>10":[[-78.276554,43.096411],[-78.270791,43.096571],[-78.256491,43.096586]],"10>15":[[-78.256491,43.096586],[-78.254578,43.096675],[-78.25317,43.096967],[-78.250952,43.098032],[-78.236074,43.098347],[-78.235826,43.098399],[-78.217636,43.098841],[-78.217633,43.098816],[-78.212489,43.098941],[-78.212728,43.104453],[-78.212646,43.107711]],"15>16":[[-78.212646,43.107711],[-78.212728,43.104453]],"16>3":[[-78.212728,43.104453],[-78.212489,43.098941],[-78.206056,43.099129]],"3>17":[[-78.206056,43.099129],[-78.19217,43.099337],[-78.185067,43.099532],[-78.184333,43.096823],[-78.183356,43.096827],[-78.18329,43.097256],[-78.18376,43.097384],[-78.183632,43.097803]],"17>18":[[-78.183632,43.097803],[-78.18376,43.097384],[-78.18329,43.097256],[-78.183356,43.096827],[-78.184333,43.096823],[-78.185067,43.099532],[-78.165502,43.099798],[-78.156063,43.099733],[-78.156204,43.092832],[-78.156985,43.092801],[-78.156858,43.094195]],"18>19":[[-78.156858,43.094195],[-78.156985,43.092801],[-78.156204,43.092832],[-78.156063,43.099733],[-78.165699,43.099795],[-78.165502,43.099798]],"19>23":[[-78.165502,43.099798],[-78.185067,43.099532],[-78.184552,43.101212],[-78.183392,43.10268],[-78.180385,43.106109],[-78.17734,43.108683]],"23>22":[[-78.17734,43.108683],[-78.180385,43.106109],[-78.183392,43.10268],[-78.184552,43.101212],[-78.185067,43.099532],[-78.192371,43.099333],[-78.192591,43.102618],[-78.192775,43.112164]],"22>1":[[-78.192775,43.112164],[-78.192565,43.102224],[-78.192371,43.099333],[-78.19217,43.099337],[-78.191876,43.097289]]}};
 let EDITS={entrances:{},routes:{}};try{EDITS=Object.assign(EDITS,JSON.parse(localStorage.getItem('cider-edits-v1')||'{}'))}catch(e){}
@@ -376,7 +384,7 @@ function drawEnt(s){s=s||vb[2]/svg.getBoundingClientRect().width;gEnt.innerHTML=
 function renderNext(){document.querySelectorAll('.poly.next').forEach(p=>p.classList.remove('next'));gNext.innerHTML='';nextAnim=null;
   if(editOn){next.style.display='none';return}next.style.display='';
   const k=D.order.findIndex((o,j)=>!done.has(j));
-  if(k<0){next.innerHTML='<div class="lab">Capture complete</div><div class="fl">All flights done</div><div class="meta">Use Reset on the Checklist to start next week.</div>';return}
+  if(k<0){legFit=null;next.innerHTML='<div class="lab">Capture complete</div><div class="fl">All flights done</div><div class="meta">Use Reset on the Checklist to start next week.</div>';return}
   const o=D.order[k],t=tolOf(k);o.members.forEach(m=>shapes[idx[m]].pe.classList.add('next'));
   const p=k>0?tolOf(k-1):D.tols.find(x=>x.base),route=p&&p.id!==t.id?getRoute(p.id+'>'+t.id):null;
   let path=null,lines=[];
@@ -389,7 +397,8 @@ function renderNext(){document.querySelectorAll('.poly.next').forEach(p=>p.class
   next.innerHTML=`<div class="lab">Next up · #${k+1} of ${D.order.length}</div><div class="fl">${o.flight}</div>
    <div class="meta">${TN(t.id)} · ${acr(o).toFixed(0)} ac · ~${o.min} min${o.note?' · '+o.note:''}</div>${lines.map(l=>`<div class="meta">${l}</div>`).join('')}
    <div class="btns"><a href="${dir((ent||[0,t.lat])[1],(ent||[t.lon])[0])}" target="_blank" rel="noopener">Directions${ent?' to gate':''}</a><button id="nshow">Show</button><button id="ndone" class="done">Done &#10003;</button></div>`;
-  nshow.onclick=()=>{if(path){const xy=path.map(q=>P(q[0],q[1])),xs=xy.map(q=>q[0]),ys=xy.map(q=>q[1]);const x0=Math.min(...xs),x1=Math.max(...xs),y0=Math.min(...ys),y1=Math.max(...ys),m=150*K;flyTo([x0-m,y0-m,x1-x0+2*m,y1-y0+2*m])}else selArea(idx[o.members[0]],true)};
+  legFit={path,me:me?[me.lon,me.lat]:null,t,area:idx[o.members[0]]};
+  nshow.onclick=fitLeg;
   ndone.onclick=()=>{done.add(k);save();refresh()};
   const ring=el('circle',{cx:t.x,cy:t.y,r:1,class:'nextring'});gNext.appendChild(ring);
   let line=null,dot=null,xy=null,cum=null;
