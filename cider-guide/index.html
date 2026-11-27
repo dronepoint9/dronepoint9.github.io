@@ -121,6 +121,7 @@ svg{width:100%;height:100%;display:block;user-select:none;-webkit-user-select:no
 .skips{margin-top:10px;padding-top:8px;border-top:1px solid #eee;font-size:13px;color:var(--muted)}
 .skips button{border:1px solid #e8b45c;background:#fff8ec;color:#7a4a00;border-radius:8px;padding:6px 10px;font:inherit;font-size:13px;font-weight:700;margin:4px 6px 0 0}
 #nback{display:block;width:100%;margin-top:10px;border:1px dashed var(--line);background:#fafaf8;color:var(--muted);border-radius:9px;padding:10px;font:inherit;font-size:13.5px;font-weight:600}
+.tag.ok{background:#e7f4ec;color:#1f5c35}
 footer{padding:6px 16px 28px;font-size:12px;color:var(--muted)}
 </style>
 </head>
@@ -296,7 +297,12 @@ const save=()=>{try{localStorage.setItem(KEY,JSON.stringify([...done]));localSto
 const pairOf=k=>{const out=[k];for(let j=k-1;j>=0&&D.order[j].flight===D.order[k].flight;j--)out.unshift(j);for(let j=k+1;j<D.order.length&&D.order[j].flight===D.order[k].flight;j++)out.push(j);return out};
 const open_=j=>!done.has(j)&&!notflown.has(j);
 // access dependencies: the key flight is only reachable through the value flight's access
-const ACCESS={'3+5+4':'17','1':'12'};
+const ACCESS={'1':'12'};
+// flights that can still be flown from outside the gate when their launch array is closed
+const OUTSIDE={'24+25E+25W':'yes','22':'yes','17':'yes','15W+15E':'yes','2E+2W':'yes','12':'yes','WLDY':'yes','14+13':'yes','6':'yes','19+SS':'yes','21+20':'yes','29':'yes','9+10':'yes','7+8':'yes','Off+26+27':'yes',
+  '3+5+4':'part'};
+const OUT_NOTE={'3+5+4':'Different route to 3: park outside the gate. 3 from there, likely 5, maybe 4.'};
+const outTxt=f=>OUTSIDE[f]==='yes'?'Can fly from outside the gate if closed':OUTSIDE[f]==='part'?'Partly from outside: '+(OUT_NOTE[f]||''):'';
 const idxOfFlight=f=>D.order.findIndex(o=>o.flight===f);
 const dependentsOf=k=>Object.keys(ACCESS).filter(d=>ACCESS[d]===D.order[k].flight).map(idxOfFlight).filter(j=>j>=0);
 const gateOf=k=>{const g=ACCESS[D.order[k].flight];return g?idxOfFlight(g):-1};
@@ -358,11 +364,12 @@ function renderNum(){const L=D.areas.map(a=>a.name).sort((a,b)=>numKey(a)-numKey
   items.innerHTML=L.map(n=>{const a=D.areas[idx[n]],t=tolById[a.tol],ks=flightsOf(n),o=D.order[ks[0]];
    return `<div class="item" data-n="${n}"><input type="checkbox" aria-label="Done"><div class="num">${o?ks[0]+1:''}</div><div class="body"><div class="fl">${n==='Offices'?'Offices (ELDY)':n==='West Laydown'?'West Laydown (WLDY)':n.replace('Array ','')}</div><div class="meta">${a.acres} ac · ${TN(t.id)}${o&&o.members.length>1?' · in '+o.flight:''}</div></div>${o?`<span class="acts">${t.near===n&&!t.base?`<button class="sk" data-sk="${ks[0]}">Skip</button>`:`<span class="via">Flown from ${t.base?'Base':t.near.replace('Array ','')}</span>`}<button class="mk" data-mk="${ks[0]}">Next</button></span>`:''}<a href="${dir(t.lat,t.lon)}" target="_blank" rel="noopener">Go</a></div>`}).join('');refresh()}
 function renderList(){document.querySelectorAll('#sortbar button').forEach(b=>b.classList.toggle('on',b.dataset.s===sortMode));if(sortMode==='num')return renderNum();items.innerHTML=plan.map(k=>{const o=D.order[k];const t=tolById[D.areas[idx[o.members[0]]].tol];
-  return `<div class="item" data-k="${k}"><input type="checkbox" aria-label="Done"><div class="num">${k+1}</div><div class="body"><div class="fl">${o.flight}</div><div class="meta">${TN(t.id)} · ${acr(o).toFixed(0)} ac · ~${o.min} min${o.note?' · '+o.note:''}</div></div><span class="acts"><button class="sk" data-sk="${k}">Skip</button><button class="mk" data-mk="${k}">Next</button></span><a href="${dir(t.lat,t.lon)}" target="_blank" rel="noopener">Go</a></div>`}).join('');refresh()}
+  return `<div class="item" data-k="${k}"><input type="checkbox" aria-label="Done"><div class="num">${k+1}</div><div class="body"><div class="fl">${o.flight}</div><div class="meta">${TN(t.id)} · ${acr(o).toFixed(0)} ac · ~${o.min} min${o.note?' · '+o.note:''}${OUTSIDE[o.flight]==='yes'?'<span class="tag ok">Outside OK</span>':OUTSIDE[o.flight]==='part'?'<span class="tag sk">Part outside</span>':''}</div>${OUT_NOTE[o.flight]?`<div class="meta">${OUT_NOTE[o.flight]}</div>`:''}</div><span class="acts"><button class="sk" data-sk="${k}">Skip</button><button class="mk" data-mk="${k}">Next</button></span><a href="${dir(t.lat,t.lon)}" target="_blank" rel="noopener">Go</a></div>`}).join('');refresh()}
 items.addEventListener('click',e=>{const it=e.target.closest('.item');if(!it||e.target.closest('a'))return;const n=it.dataset.n,k=+it.dataset.k;
   if(e.target.dataset.sk!==undefined){const j=+e.target.dataset.sk,pr=pairOf(j).filter(open_);if(!pr.length)return;
     if(pr.some(x=>skipped.has(x))){snap('Open on '+D.order[j].flight);reinsert(j)}
-    else{snap('Skip on '+D.order[j].flight);const dep=dependentsOf(j).flatMap(d=>pairOf(d).filter(open_));[...pr,...dep].forEach(x=>{skipped.add(x);delete tags[x]});save();renderList()}
+    else{if(OUTSIDE[D.order[j].flight]==='yes'&&!e.target.dataset.armed){const b=e.target;b.dataset.armed=1;b.textContent='Skip anyway?';setTimeout(()=>{if(document.body.contains(b)){delete b.dataset.armed;b.textContent='Skip'}},4000);return}
+      snap('Skip on '+D.order[j].flight);const dep=dependentsOf(j).flatMap(d=>pairOf(d).filter(open_));[...pr,...dep].forEach(x=>{skipped.add(x);delete tags[x]});save();renderList()}
     return}
   if(e.target.dataset.mk!==undefined){snap('Next on '+D.order[+e.target.dataset.mk].flight);moveUp(+e.target.dataset.mk);show('map');mapwrap.scrollIntoView({behavior:'smooth'});return}
   if(e.target.tagName==='INPUT'){snap((e.target.checked?'check on ':'uncheck on ')+(n!==undefined?n.replace('Array ',''):fl(k)));const ks=n!==undefined?flightsOf(n):[k];ks.forEach(j=>markDone(j,e.target.checked));save();refresh();return}
@@ -492,6 +499,7 @@ function renderNext(){document.querySelectorAll('.poly.next').forEach(p=>p.class
   else if(p.id!==t.id){path=[[p.lon,p.lat],[t.lon,t.lat]];lines.push(`${distTxt(hav(path[0],path[1]))} straight-line from the ${TN(p.id)}`)}
   else lines.push(prevK!==null?'Same TOL as the last flight':'First flight of the day');
   const ent=getEnt(t.id);if(ent)lines.push('Entrance marked on the map');
+  if(outTxt(o.flight))lines.push(outTxt(o.flight));
   const tag=pick.mode==='moved'?'<span class="tag mv">Moved up</span>':pick.mode==='reopened'?'<span class="tag mv">Reopened</span>':pick.mode==='return'?'<span class="tag sk">Skipped earlier</span>':'';
   const sk=[];new Set([...skipped].filter(j=>open_(j)&&j!==k).map(j=>pairOf(j)[0])).forEach(j=>{const g=gateOf(j);if(g>=0&&skipped.has(g)&&open_(g))return;sk.push(j)});
   const skLabel=j=>{const deps=dependentsOf(j).filter(d=>skipped.has(d)&&open_(d)).map(d=>D.order[d].flight);return D.order[j].flight+(deps.length?' + '+deps.join(' + '):'')};
@@ -502,7 +510,8 @@ function renderNext(){document.querySelectorAll('.poly.next').forEach(p=>p.class
   const sameTol=prevK!==null&&p.id===t.id;
   legFit={path,t,next:o.members,prev:(prevK!==null&&!sameTol)?D.order[prevK].members:[],sameTol};
   ndone.onclick=()=>{snap('Done on '+fl(k));markDone(k,true);save();refresh();fitLeg()};
-  nskip.onclick=()=>{snap((pick.mode==='return'?'Not flown on ':'Skip on ')+D.order[k].flight);const pr=pairOf(k).filter(open_);
+  nskip.onclick=()=>{if(OUTSIDE[o.flight]==='yes'&&pick.mode!=='return'&&!nskip.dataset.armed){nskip.dataset.armed=1;nskip.textContent='Skip anyway?';setTimeout(()=>{if(document.body.contains(nskip)){delete nskip.dataset.armed;nskip.textContent='Skip'}},4000);return}
+    snap((pick.mode==='return'?'Not flown on ':'Skip on ')+D.order[k].flight);const pr=pairOf(k).filter(open_);
     if(pick.mode==='return'){const g=gateOf(k),grp=[...pr,...dependentsOf(k).filter(d=>skipped.has(d)).flatMap(d=>pairOf(d)),...(g>=0&&skipped.has(g)?pairOf(g):[])].filter(open_);
       grp.forEach(j=>{notflown.add(j);skipped.delete(j)})}
     else{const dep=dependentsOf(k).flatMap(d=>pairOf(d).filter(open_));[...pr,...dep].forEach(j=>{skipped.add(j);delete tags[j]})}
