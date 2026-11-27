@@ -526,6 +526,11 @@ function buildGraph(){const G=new Map(),C=new Map(),key=q=>q[0].toFixed(5)+','+q
   LEGS.forEach(l=>{const r=getRoute(l.key);if(!r)return;const P=[[l.from.lon,l.from.lat],...r,[l.to.lon,l.to.lat]];for(let i=0;i<P.length-1;i++)add(P[i],P[i+1])});
   [...new Set(D.order.map(o=>o.flight))].forEach(f=>{const A=getAlt(f);if(!A)return;let best=null,bd=Infinity;C.forEach(c=>{const d=hav(c,A[0]);if(d<bd){bd=d;best=c}});
     if(best)add(best,A[0]);for(let i=0;i<A.length-1;i++)add(A[i],A[i+1])});
+  // an alternate that runs along a traced road joins that road wherever it passes within 15 m of it
+  const roadEdges=[];G.forEach((nb,ka)=>nb.forEach((w,kb)=>{if(ka<kb)roadEdges.push([C.get(ka),C.get(kb)])}));
+  [...new Set(D.order.map(o=>o.flight))].forEach(f=>{const A=getAlt(f);if(!A)return;A.slice(1).forEach(q=>{const kq=key(q);
+    roadEdges.forEach(([a,b])=>{if(key(a)===kq||key(b)===kq)return;const cl=Math.cos(q[1]*Math.PI/180),ax=(a[0]-q[0])*cl,ay=a[1]-q[1],bx=(b[0]-q[0])*cl,by=b[1]-q[1],dx=bx-ax,dy=by-ay,L=dx*dx+dy*dy;
+      if(!L)return;const t=Math.max(0,Math.min(1,-(ax*dx+ay*dy)/L));if(t<=0||t>=1)return;const d=Math.hypot(ax+t*dx,ay+t*dy)*111320;if(d<15){add(q,a);add(q,b)}})})});
   graph={G,C,key};return graph}
 function routeBetween(a,b){
   const f=getRoute(a.id+'>'+b.id);if(f)return{pts:f,direct:true};
